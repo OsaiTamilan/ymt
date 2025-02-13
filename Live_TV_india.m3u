@@ -1,0 +1,63 @@
+#EXTM3U
+
+#EXTINF:-1 tvg-id="News7 Tamil", tvg-logo="https://i0.wp.com/news7tamil.live/wp-content/uploads/2020/06/logo.png" group-title="News", c-name="News7" language="Tamil"
+https://segment.yuppcdn.net/240122/news7/240122/news7_1800/chunks.m3u8
+
+#EXTINF:-1 tvg-id="PuthiTalmurai", tvg-logo="https://gumlet.assettype.com/puthiyathalaimurai/2023-03/2bc40af7-5a6f-41d6-9014-aa42e9f07450/PT_logo.png", group-title="Puthiya Yukam",Puthiya Yukam, c-name="Puthiya Talai" language="Tamil"
+https://segment.yuppcdn.net/240122/puthiya/240122/puthiya_1800/chunks.m3u8
+
+#EXTINF:-1 tvg-id="Thanthi TV" tvg-logo="https://d229kpbsb5jevy.cloudfront.net/tv/150/150/bnw/thanthi-tv-black.png" group-title="News" c-name="Thanthi TV" language="Tamil"
+https://yuppmedtaorire.akamaized.net/v1/master/a0d007312bfd99c47f76b77ae26b1ccdaae76cb1/thanthi_nim_https/110322/thanthi/playlist.m3u8
+
+#EXTINF:-1 tvg-id="Makkal TV", tvg-logo="https://d229kpbsb5jevy.cloudfront.net/tv/150/150/bnw/makkal-tv-black.png" group-title="Entertainment", c-name="Makkal TV" language="Tamil"
+https://5k8q87azdy4v-hls-live.wmncdn.net/MAKKAL/271ddf829afeece44d8732757fba1a66.sdp/chunks.m3u8
+
+#EXTINF:-1 tvg-id="VasanthTV" tvg-logo="https://upload.wikimedia.org/wikipedia/en/b/bf/Vasanth_TV_logo.png" group-title="Undefined" c-name="Vasanth TV" language="Tamil"
+https://vasanth.pc.cdn.bitgravity.com/vasanth/secure/live/feed01/playlist.m3u8
+
+#EXTINF:-1 tvg-id="3TamilTV.au" tvg-logo="https://threetamil.tv/wp-content/uploads/2020/08/3Tamil_logo_white.png" group-title="Entertainment", c-name="3 Tamil TV" language="Tamil"
+https://6n3yogbnd9ok-hls-live.5centscdn.com/threetamil/d0dbe915091d400bd8ee7f27f0791303.sdp/index.m3u8
+
+#EXTINF:-1 tvg-id="AaseervathamTV" tvg-logo="https://i.imgur.com/GlfrYs7.png" group-title="Undefined" c-name="Blessing TV" Tamil language="Tamil"
+https://stream.blessingtv.tv:1443/blessingtv-tamillive/mystream_720p/playlist.m3u8
+
+#EXTINF:-1 tvg-id="PolimerNews", tvg-logo="https://india.mom-gmr.org/uploads/_processed_/a/8/csm_16526-1592_import_8b69c34c23.png", group-title="Polimer News", c-name="Polimer News"
+https://segment.yuppcdn.net/110322/polimernews/110322/polimernews_1800/chunks.m3u8
+
+#EXTINF:-1 tvg-id="EETTV" tvg-logo="https://i.imgur.com/rMldFW8.png" group-title="Entertainment" c-name="EET TV" language="Tamil"
+https://live.streamjo.com/eetlive/eettv.m3u8
+
+#EXTINF:-1 tvg-id="Murasu TV" tvg-logo="https://d229kpbsb5jevy.cloudfront.net/tv/150/150/bnw/murasu-black.png" group-title="Entertainment" c-name="Murasu TV" language="Tamil"
+https://yuppmedtaorire.akamaized.net/v1/master/a0d007312bfd99c47f76b77ae26b1ccdaae76cb1/murasu_nim_https/050522/murasu/playlist.m3u8
+
+#EXTINF:-1 tvg-id="MadhaTV" tvg-logo="https://i.imgur.com/UBBaXzz.png" group-title="Undefined" c-name="Madha TV" language="Tamil"
+https://60e68b19dd194.streamlock.net:55/madhatv/madhatv.stream_HDp/playlist.m3u8
+
+
+#EXTINF:-1 tvg-id="PolimerTV" tvg-logo="https://d229kpbsb5jevy.cloudfront.net/tv/150/150/bnw/polimertv-black.png" group-title="Entertainment", c-name="PolimerTV" language="Tamil"
+https://previewsecgire.akamaized.net/v1/master/a0d007312bfd99c47f76b77ae26b1ccdaae76cb1/pr_live_ire_sd/polimertv/master/chunklist.m3u8
+
+#EXTINF:-1 tvg-id="VendharTV" tvg-logo="https://d229kpbsb5jevy.cloudfront.net/tv/150/150/bnw/vendhartv-black.png" group-title="Entertainment", c-name="VendharTV" language="Tamil"
+https://previewsecgire.akamaized.net/v1/master/a0d007312bfd99c47f76b77ae26b1ccdaae76cb1/pr_live_ire_sd/vendhartv/master/chunklist.m3u8
+
+#EXTINF:-1 tvg-id="AajTak.in" tvg-logo="https://i.imgur.com/RpIdCB3.png" group-title="News"  c-name="Aaj Tak" language="Hindi"
+https://feeds.intoday.in/aajtak/api/aajtakhd/master.m3u8
+
+#EXTINF:-1 tvg-id="ABPNews.in" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/ABP_News_logo.svg/512px-ABP_News_logo.svg.png" group-title="News" c-name="ABP News" language="Hindi"
+https://abplivetv.akamaized.net/hls/live/2043010/hindi/master.m3u8
+
+#EXTINF:-1 tvg-id="IBC24.in" tvg-logo="https://i.imgur.com/2LbR2a0.png" group-title="News" c-name="IBC 24" language="Hindi"
+https://livetv.ibc24.in/livestream.m3u8
+
+#EXTINF:-1 tvg-id="NDTVIndia.in" tvg-logo="https://i.imgur.com/PyDjUZB.png" group-title="News" c-name="NDTV India" language="Hindi"
+https://ndtvindiaelemarchana.akamaized.net/hls/live/2003679/ndtvindia/master.m3u8
+
+
+#EXTINF:-1 tvg-id="IndiaToday.in" tvg-logo="https://i.imgur.com/koFYddE.png" group-title="News" c-name="India Today" language="English"
+https://indiatodaylive.akamaized.net/hls/live/2014320/indiatoday/indiatodaylive/playlist.m3u8
+
+#EXTINF:-1 tvg-id="OneTV.in" tvg-logo="https://i.imgur.com/6Jh8LRI.png" group-title="Entertainment" c-name="One TV" language="Malayalam"
+http://137.59.86.218:1935/live/onetv/playlist.m3u8
+
+#EXTINF:-1 tvg-id="TV9Telugu.in" tvg-logo="https://i.imgur.com/ufH48jV.png" group-title="Undefined"c-name="TV9 Telugu" language="Telugu"
+https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9telcmjhcs/liveabr/playlist.m3u8
