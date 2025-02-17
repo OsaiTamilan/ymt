@@ -425,10 +425,11 @@ main {
 /* Loading states */
 .channel-list:empty::after,
 .categories-list:empty::after {
-  content: "Loading...";
+  content: "❤️❤️🧡❤️❤️WelCome... ❤️❤️🧡❤️❤️ Use Right Arrow ➡ then ↑UP/↓DOWN Arrow watch Next Channel ❤️ Type No. go to Channel directly";
   display: block;
   text-align: center;
   padding: 1rem;
   color: rgba(255, 255, 255, 0.7);
   font-size: 1.1rem;
+  width: 80%;
 }
