@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Video Player</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script type="module" src="player.js"></script>
+  </head>
+  <body>
+    <main class="player-page">
+      <div class="player-container">
+        <nav class="main-nav">
+          <div class="nav-item selected">
+            <span class="material-icons">home</span>
+            <span>Home</span>
+          </div>
+          <div class="nav-item">
+            <span class="material-icons">language</span>
+            <span>Language</span>
+          </div>
+          <div class="nav-item">
+            <span class="material-icons">category</span>
+            <span>Category</span>
+          </div>
+          <div class="nav-item">
+            <span class="material-icons">info</span>
+            <span>About</span>
+          </div>
+          <div class="nav-item">
+            <span class="material-icons">settings</span>
+            <span>Settings</span>
+          </div>
+        </nav>
+        <div class="categories-list">
+          <!-- Will be populated by JavaScript -->
+        </div>
+        <div id="channelListSection" class="channel-list-section">
+          <div id="channelList" class="channel-list">
+            WelCome...
+          </div>
+        </div>
+        <div class="video-section">
+          <div class="video-container">
+            <video id="videoPlayer" controls playsinline></video>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

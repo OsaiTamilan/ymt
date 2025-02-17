@@ -1,0 +1,27 @@
+#EXTM3U
+#EXTINF:-1 tvg-logo="https://i0.wp.com/news7tamil.live/wp-content/uploads/2020/06/logo.png" group-title="Live Sports" c-no="1" Language="English" Category="Sports",Live
+https://segment.yuppcdn.net/240122/news7/240122/news7_1800/chunks.m3u8
+
+#EXTINF:-1 tvg-logo="https://i0.wp.com/news7tamil.live/wp-content/uploads/2020/06/logo.png" group-title="Live Sports" c-no="2" Language="Tamil" Category="Kids",Live
+https://yuppmedtaorire.akamaized.net/v1/master/a0d007312bfd99c47f76b77ae26b1ccdaae76cb1/thanthi_nim_https/110322/thanthi/playlist.m3u8
+
+#EXTINF:-1 tvg-logo="https://i0.wp.com/news7tamil.live/wp-content/uploads/2020/06/logo.png" group-title="Live Sports" c-no="3" Language="Malayalam" Category="Comedy",Live
+https://5k8q87azdy4v-hls-live.wmncdn.net/MAKKAL/271ddf829afeece44d8732757fba1a66.sdp/chunks.m3u8
+
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/subirkumarpaul/Logo/main/T%20Sports.png" group-title="Bangla" c-no="4" Language="Bangla" Category="News",T News 
+https://iptvcable.netlify.app/Altogether-007/Tsports.m3u8
+
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/subirkumarpaul/Logo/main/T%20Sports.png" group-title="Bangla" c-no="4" Language="Bangla" Category="Kids",T Kids 
+https://vasanth.pc.cdn.bitgravity.com/vasanth/secure/live/feed01/playlist.m3u8
+
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/subirkumarpaul/Logo/main/T%20Sports.png" group-title="Bangla" c-no="4" Language="Telungu" Category="Sports",T Sports 
+https://6n3yogbnd9ok-hls-live.5centscdn.com/threetamil/d0dbe915091d400bd8ee7f27f0791303.sdp/index.m3u8
+
+#EXTINF:-1 tvg-logo="https://raw.githubusercontent.com/subirkumarpaul/Logo/main/T%20Sports.png" group-title="Bangla" c-no="4" Language="Tamil" Category="Comedy",T Comedy 
+https://stream.blessingtv.tv:1443/blessingtv-tamillive/mystream_720p/playlist.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.imgur.com/rMldFW8.png" group-title="Bangla" c-no="4" Language="Bangla" Category="Comedy",T Comedy 
+https://segment.yuppcdn.net/110322/polimernews/110322/polimernews_1800/chunks.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.imgur.com/UBBaXzz.png" group-title="Bangla" c-no="4" Language="Bangla" Category="Entertainment",T Sports 
+https://60e68b19dd194.streamlock.net:55/madhatv/madhatv.stream_HDp/playlist.m3u8
