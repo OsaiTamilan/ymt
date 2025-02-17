@@ -62,7 +62,7 @@ http://137.59.86.218:1935/live/onetv/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/ufH48jV.png" group-title="Live" c-no="172" Language="Telugu" Category="Entert.",TV9Telugu
 https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9telcmjhcs/liveabr/playlist.m3u8
 
-#EXTINF:-1 tvg-logo="https://kidscreation.tv/wp-content/uploads/2022/11/KidsCreation-Logo-1.png" group-title="Live" c-no="423" Language="Hindi" Category="Kids",Kids Creation
+#EXTINF:-1 tvg-logo="https://seeklogo.com/images/Z/zoomoo-logo-FA728C7940-seeklogo.com.png" group-title="Live" c-no="423" Language="Hindi" Category="Kids",Kids Creation
 https://vods1.aynaott.com/kidscreation_test/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/3RxSzVbd/image.jpg" group-title="Live" c-no="424" Language="Emglish" Category="Kids",Zoo Moo
