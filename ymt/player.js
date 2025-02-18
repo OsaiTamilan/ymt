@@ -1,5 +1,6 @@
 let currentChannelIndex = 0;
 let channels = [];
+let filteredChannels = [];
 let categories = new Set();
 let languages = new Set();
 let currentSection = 'home';
@@ -13,7 +14,7 @@ let isPlayerPage = false;
 
 async function loadChannels() {
   try {
-    const response = await fetch('../ymt/data/channels.m3u');
+    const response = await fetch('/data/channels.m3u');
     const data = await response.text();
     return parseM3U(data);
   } catch (error) {
@@ -166,7 +167,7 @@ function updateChannelList() {
   
   channelList.innerHTML = '';
   
-  const filteredChannels = channels.filter(channel => {
+  filteredChannels = channels.filter(channel => {
     if (currentSection === 'category') {
       return channel.category === currentCategory;
     } else if (currentSection === 'language') {
@@ -178,6 +179,12 @@ function updateChannelList() {
   filteredChannels.forEach((channel, index) => {
     channelList.appendChild(createChannelElement(channel, index));
   });
+
+  // Reset current channel index when filter changes
+  currentChannelIndex = 0;
+  if (filteredChannels.length > 0) {
+    loadChannel(0);
+  }
 }
 
 function createChannelElement(channel, index) {
@@ -199,7 +206,11 @@ function createChannelElement(channel, index) {
 function loadChannel(index) {
   if (!isPlayerPage) return;
   
-  const channel = channels[index];
+  const channelsToUse = filteredChannels.length > 0 ? filteredChannels : channels;
+  const channel = channelsToUse[index];
+  
+  if (!channel) return;
+  
   currentChannelIndex = index;
   
   const video = document.getElementById('videoPlayer');
@@ -227,7 +238,6 @@ function loadChannel(index) {
     });
   }
   
-  // Only hide lists if Enter was pressed (handled in handleNavigation)
   if (!listsVisible) {
     toggleListsVisibility(false);
   }
@@ -236,9 +246,10 @@ function loadChannel(index) {
 function changeChannel(direction) {
   if (!isPlayerPage) return;
   
+  const channelsToUse = filteredChannels.length > 0 ? filteredChannels : channels;
   const newIndex = currentChannelIndex + direction;
-  if (newIndex >= 0 && newIndex < channels.length) {
-    // Don't hide lists when changing channels with up/down
+  
+  if (newIndex >= 0 && newIndex < channelsToUse.length) {
     listsVisible = true;
     loadChannel(newIndex);
   }
@@ -300,7 +311,6 @@ function handleNavigation(event) {
   switch(event.key) {
     case 'ArrowLeft':
       if (activeColumn === 0 && isPlayerPage) {
-        // Hide all listings when left arrow is pressed on main nav
         listsVisible = false;
         toggleListsVisibility(false);
       } else if (activeColumn > 0) {
@@ -322,7 +332,6 @@ function handleNavigation(event) {
           item.classList.toggle('selected', index === currentChannelIndex);
         });
         ensureChannelVisible(currentChannelIndex);
-        // Keep lists visible during up/down navigation
         listsVisible = true;
         loadChannel(currentChannelIndex);
       }
@@ -331,7 +340,8 @@ function handleNavigation(event) {
     case 'ArrowDown':
       const maxNav = document.querySelectorAll('.nav-item').length - 1;
       const maxCategory = document.querySelectorAll('.category-item')?.length - 1 || 0;
-      const maxChannel = document.querySelectorAll('.channel-item')?.length - 1 || 0;
+      const channelsToUse = filteredChannels.length > 0 ? filteredChannels : channels;
+      const maxChannel = channelsToUse.length - 1;
 
       if (activeColumn === 0 && currentNavIndex < maxNav) {
         currentNavIndex++;
@@ -345,7 +355,6 @@ function handleNavigation(event) {
           item.classList.toggle('selected', index === currentChannelIndex);
         });
         ensureChannelVisible(currentChannelIndex);
-        // Keep lists visible during up/down navigation
         listsVisible = true;
         loadChannel(currentChannelIndex);
       }
@@ -378,7 +387,6 @@ function handleNavigation(event) {
             updateCategoriesList();
             updateChannelList();
           } else {
-            // If on about or settings page, navigate to player page first
             currentSection = section;
             navigateToPlayer();
           }
@@ -395,12 +403,10 @@ function handleNavigation(event) {
           if (isPlayerPage) {
             updateChannelList();
           } else {
-            // If on about or settings page, navigate to player page
             navigateToPlayer();
           }
         }
       } else if (activeColumn === 2 && isPlayerPage) {
-        // Only hide lists when Enter is pressed on a channel
         listsVisible = false;
         loadChannel(currentChannelIndex);
       }
@@ -432,7 +438,6 @@ function ensureChannelVisible(index) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Check if we're on the player page
   isPlayerPage = document.getElementById('videoPlayer') !== null;
   
   channels = await loadChannels();
