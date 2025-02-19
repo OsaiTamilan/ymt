@@ -191,6 +191,7 @@ function createChannelElement(channel, index) {
   const element = document.createElement('div');
   element.className = 'channel-item';
   element.dataset.index = index;
+  element.dataset.channelNo = channel.channelNo;
   if (index === currentChannelIndex) element.classList.add('selected');
   
   element.innerHTML = `
@@ -240,6 +241,23 @@ function loadChannel(index) {
   
   if (!listsVisible) {
     toggleListsVisibility(false);
+  }
+}
+
+function playSelectedChannel() {
+  const savedChannelNo = localStorage.getItem('selectedChannelNo');
+  const savedChannelUrl = localStorage.getItem('selectedChannelUrl');
+  
+  if (savedChannelNo && savedChannelUrl) {
+    const channelIndex = channels.findIndex(ch => ch.channelNo === parseInt(savedChannelNo));
+    if (channelIndex !== -1) {
+      currentChannelIndex = channelIndex;
+      loadChannel(currentChannelIndex);
+    }
+    
+    // Clear stored data after use
+    localStorage.removeItem('selectedChannelNo');
+    localStorage.removeItem('selectedChannelUrl');
   }
 }
 
@@ -447,9 +465,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateChannelList();
     updateActiveColumn();
     
-    if (channels.length > 0) {
-      loadChannel(0);
-    }
+    // Play the selected channel if coming from index page
+    playSelectedChannel();
   }
 });
 
