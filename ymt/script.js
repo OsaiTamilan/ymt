@@ -47,6 +47,7 @@ function parseM3U(content) {
 function createChannelCard(channel) {
   const card = document.createElement('div');
   card.className = 'channel-card';
+  card.dataset.channelNo = channel.channelNo;
   
   const content = `
     <div class="channel-logo-container">
@@ -110,7 +111,12 @@ function handleKeyPress(event) {
       break;
     case 'Enter':
       const selectedChannel = channels[selectedIndex];
-      window.location.href = `player.html`;
+      if (selectedChannel && selectedChannel.channelNo) {
+        // Store both channel number and URL
+        localStorage.setItem('selectedChannelNo', selectedChannel.channelNo.toString());
+        localStorage.setItem('selectedChannelUrl', selectedChannel.url);
+        window.location.href = 'player.html';
+      }
       break;
   }
 
