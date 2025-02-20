@@ -1,9 +1,17 @@
 {
+  "name": "tv-channels",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "start": "servor --reload"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "servor": "^4.0.2",
-    "hls.js": "^1.4.12"
+    "hls.js": "^1.5.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.12"
   }
 }
