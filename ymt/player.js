@@ -11,10 +11,12 @@ let listsVisible = true;
 let numberInput = '';
 let numberInputTimeout = null;
 let isPlayerPage = false;
+let autoHideTimeout = null;
+let numberDisplayTimeout = null;
 
 async function loadChannels() {
   try {
-    const response = await fetch('../ymt/data/channels.m3u');
+    const response = await fetch('/data/channels.m3u');
     const data = await response.text();
     return parseM3U(data);
   } catch (error) {
@@ -62,7 +64,19 @@ function parseM3U(content) {
   return channels;
 }
 
-function showNumberInput() {
+function resetAutoHideTimer() {
+  if (!isPlayerPage) return;
+  
+  clearTimeout(autoHideTimeout);
+  autoHideTimeout = setTimeout(() => {
+    if (listsVisible) {
+      listsVisible = false;
+      toggleListsVisibility(false);
+    }
+  }, 5000); // 5 seconds
+}
+
+function showNumberInput(message = '') {
   if (!isPlayerPage) return;
   
   let numberDisplay = document.getElementById('numberDisplay');
@@ -71,8 +85,16 @@ function showNumberInput() {
     numberDisplay.id = 'numberDisplay';
     document.querySelector('.video-section')?.appendChild(numberDisplay);
   }
-  numberDisplay.textContent = numberInput;
+  numberDisplay.textContent = message || numberInput;
   numberDisplay.style.display = 'block';
+  
+  // Clear any existing timeout
+  clearTimeout(numberDisplayTimeout);
+  
+  // Set new timeout to hide the message
+  numberDisplayTimeout = setTimeout(() => {
+    hideNumberInput();
+  }, 2000);
 }
 
 function hideNumberInput() {
@@ -86,21 +108,40 @@ function hideNumberInput() {
 function handleNumberInput(number) {
   if (!isPlayerPage) return;
   
-  numberInput += number;
-  showNumberInput();
+  // Limit to 4 digits
+  if (numberInput.length >= 4) return;
   
-  clearTimeout(numberInputTimeout);
-  numberInputTimeout = setTimeout(() => {
-    const channelNumber = parseInt(numberInput);
-    const channel = channels.find(ch => ch.channelNo === channelNumber);
-    if (channel) {
-      const index = channels.indexOf(channel);
+  numberInput += number;
+  
+  // Check if the current number input matches any channel number
+  const channelNumber = parseInt(numberInput);
+  const availableChannel = channels.find(ch => ch.channelNo === channelNumber);
+  
+  if (availableChannel) {
+    showNumberInput(numberInput);
+    clearTimeout(numberInputTimeout);
+    numberInputTimeout = setTimeout(() => {
+      const index = channels.indexOf(availableChannel);
       if (index !== -1) {
         loadChannel(index);
       }
+      numberInput = '';
+    }, 2000);
+  } else {
+    // Check if any channel starts with the current input
+    const possibleChannel = channels.some(ch => 
+      ch.channelNo?.toString().startsWith(numberInput)
+    );
+    
+    if (!possibleChannel) {
+      // If no channel exists or could exist with this prefix, clear the input
+      numberInput = number;
+      showNumberInput(numberInput);
+    } else {
+      // Show the current input as we're still potentially building a valid number
+      showNumberInput(numberInput);
     }
-    hideNumberInput();
-  }, 2000);
+  }
 }
 
 function toggleListsVisibility(show) {
@@ -121,6 +162,7 @@ function toggleListsVisibility(show) {
     mainNav.style.display = 'flex';
     categoriesList.style.display = 'block';
     channelListSection.style.display = 'block';
+    resetAutoHideTimer();
   } else {
     mainNav.style.width = '0';
     categoriesList.style.width = '0';
@@ -129,6 +171,7 @@ function toggleListsVisibility(show) {
     mainNav.style.display = 'none';
     categoriesList.style.display = 'none';
     channelListSection.style.display = 'none';
+    clearTimeout(autoHideTimeout);
   }
   listsVisible = show;
 }
@@ -180,7 +223,6 @@ function updateChannelList() {
     channelList.appendChild(createChannelElement(channel, index));
   });
 
-  // Reset current channel index when filter changes
   currentChannelIndex = 0;
   if (filteredChannels.length > 0) {
     loadChannel(0);
@@ -255,7 +297,6 @@ function playSelectedChannel() {
       loadChannel(currentChannelIndex);
     }
     
-    // Clear stored data after use
     localStorage.removeItem('selectedChannelNo');
     localStorage.removeItem('selectedChannelUrl');
   }
@@ -279,12 +320,37 @@ let currentCategoryIndex = 0;
 function updateNavSelection() {
   document.querySelectorAll('.nav-item').forEach((item, index) => {
     item.classList.toggle('selected', index === currentNavIndex);
+    
+    if (index === currentNavIndex) {
+      const section = item.querySelector('span:last-child').textContent.toLowerCase();
+      if (section === 'language' || section === 'category') {
+        currentSection = section;
+        currentCategory = '';
+        currentLanguage = '';
+        if (isPlayerPage) {
+          updateCategoriesList();
+          updateChannelList();
+        }
+      }
+    }
   });
 }
 
 function updateCategorySelection() {
   document.querySelectorAll('.category-item').forEach((item, index) => {
     item.classList.toggle('selected', index === currentCategoryIndex);
+    
+    if (index === currentCategoryIndex) {
+      const selectedItem = item.textContent;
+      if (currentSection === 'category') {
+        currentCategory = selectedItem;
+      } else if (currentSection === 'language') {
+        currentLanguage = selectedItem;
+      }
+      if (isPlayerPage) {
+        updateChannelList();
+      }
+    }
   });
 }
 
@@ -304,6 +370,11 @@ function navigateToPlayer() {
 }
 
 function handleNavigation(event) {
+  // Reset auto-hide timer on any navigation
+  if (isPlayerPage && listsVisible) {
+    resetAutoHideTimer();
+  }
+
   // Handle number keys (0-9)
   if (event.key >= '0' && event.key <= '9' && isPlayerPage) {
     handleNumberInput(event.key);
@@ -333,6 +404,13 @@ function handleNavigation(event) {
         toggleListsVisibility(false);
       } else if (activeColumn > 0) {
         activeColumn--;
+        updateActiveColumn();
+      }
+      break;
+
+    case 'ArrowRight':
+      if (activeColumn < 2 && isPlayerPage) {
+        activeColumn++;
         updateActiveColumn();
       }
       break;
@@ -378,13 +456,6 @@ function handleNavigation(event) {
       }
       break;
 
-    case 'ArrowRight':
-      if (activeColumn < 2 && isPlayerPage) {
-        activeColumn++;
-        updateActiveColumn();
-      }
-      break;
-
     case 'Enter':
       if (activeColumn === 0) {
         const navItems = document.querySelectorAll('.nav-item');
@@ -398,29 +469,7 @@ function handleNavigation(event) {
         } else if (section === 'settings') {
           navigateToPage('settings.html');
         } else if (section === 'language' || section === 'category') {
-          if (isPlayerPage) {
-            currentSection = section;
-            currentCategory = '';
-            currentLanguage = '';
-            updateCategoriesList();
-            updateChannelList();
-          } else {
-            currentSection = section;
-            navigateToPlayer();
-          }
-        }
-      } else if (activeColumn === 1) {
-        const categoryItems = document.querySelectorAll('.category-item');
-        const selectedCategory = categoryItems[currentCategoryIndex];
-        if (selectedCategory) {
-          if (currentSection === 'category') {
-            currentCategory = selectedCategory.textContent;
-          } else if (currentSection === 'language') {
-            currentLanguage = selectedCategory.textContent;
-          }
-          if (isPlayerPage) {
-            updateChannelList();
-          } else {
+          if (!isPlayerPage) {
             navigateToPlayer();
           }
         }
@@ -444,6 +493,11 @@ function updateActiveColumn() {
   mainNav.classList.toggle('active', activeColumn === 0);
   categoriesList.classList.toggle('active', activeColumn === 1);
   channelList.classList.toggle('active', activeColumn === 2);
+
+  if (activeColumn === 1) {
+    currentCategoryIndex = 0;
+    updateCategorySelection();
+  }
 }
 
 function ensureChannelVisible(index) {
@@ -465,7 +519,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateChannelList();
     updateActiveColumn();
     
-    // Play the selected channel if coming from index page
     playSelectedChannel();
   }
 });
