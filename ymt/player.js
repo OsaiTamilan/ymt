@@ -16,7 +16,7 @@ let numberDisplayTimeout = null;
 
 async function loadChannels() {
   try {
-    const response = await fetch('/data/channels.m3u');
+    const response = await fetch('../ymt/data/channels.m3u');
     const data = await response.text();
     return parseM3U(data);
   } catch (error) {
