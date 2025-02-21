@@ -23,41 +23,42 @@
         <h1>TV Channels</h1>
         <div class="featured-info">
           <p>Browse and watch your favorite channels</p>
-          <p class="navigation-hint">Use arrow keys to navigate and Enter to select</p>
-          <nav class="banner-nav">
-            <div class="nav-item selected">
-              <span class="material-icons">home</span>
-              <span>Home</span>
-            </div>
-            <div class="nav-item has-dropdown">
-              <span class="material-icons">filter_list</span>
-              <span>Filter</span>
-              <div class="dropdown-menu">
-                <div class="dropdown-header">
-                  <span class="material-icons">language</span>
-                  <span>Languages</span>
-                </div>
-                <div class="language-list">
-                  <!-- Will be populated by JavaScript -->
-                </div>
-              </div>
-            </div>
-            <div class="nav-item">
-              <span class="material-icons">info</span>
-              <span>About</span>
-            </div>
-            <div class="nav-item">
-              <span class="material-icons">settings</span>
-              <span>Settings</span>
-            </div>
-          </nav>
+          <p class="navigation-hint">Use arrow keys to navigate, Enter to select, or type channel number directly</p>
         </div>
       </div>
+      <nav class="main-nav-bar">
+        <div class="nav-item selected">
+          <span class="material-icons">home</span>
+          <span>Home</span>
+        </div>
+        <div class="nav-item has-dropdown">
+          <span class="material-icons">filter_list</span>
+          <span>Filter</span>
+          <div class="dropdown-menu">
+            <div class="dropdown-header">
+              <span class="material-icons">language</span>
+              <span>Languages</span>
+            </div>
+            <div class="language-list">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+        <div class="nav-item">
+          <span class="material-icons">info</span>
+          <span>About</span>
+        </div>
+        <div class="nav-item">
+          <span class="material-icons">settings</span>
+          <span>Settings</span>
+        </div>
+      </nav>
       <div class="channels-container">
         <div id="channelList" class="channel-grid">
           <div class="loading">Loading channels...</div>
         </div>
       </div>
+      <div id="numberDisplay"></div>
     </main>
   </body>
 </html>

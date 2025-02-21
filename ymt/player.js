@@ -1,3 +1,5 @@
+import { handleNumberInput } from './channelInput.js';
+
 let currentChannelIndex = 0;
 let channels = [];
 let filteredChannels = [];
@@ -8,11 +10,8 @@ let currentCategory = '';
 let currentLanguage = '';
 let activeColumn = 0;
 let listsVisible = true;
-let numberInput = '';
-let numberInputTimeout = null;
 let isPlayerPage = false;
 let autoHideTimeout = null;
-let numberDisplayTimeout = null;
 
 async function loadChannels() {
   try {
@@ -74,74 +73,6 @@ function resetAutoHideTimer() {
       toggleListsVisibility(false);
     }
   }, 5000); // 5 seconds
-}
-
-function showNumberInput(message = '') {
-  if (!isPlayerPage) return;
-  
-  let numberDisplay = document.getElementById('numberDisplay');
-  if (!numberDisplay) {
-    numberDisplay = document.createElement('div');
-    numberDisplay.id = 'numberDisplay';
-    document.querySelector('.video-section')?.appendChild(numberDisplay);
-  }
-  numberDisplay.textContent = message || numberInput;
-  numberDisplay.style.display = 'block';
-  
-  // Clear any existing timeout
-  clearTimeout(numberDisplayTimeout);
-  
-  // Set new timeout to hide the message
-  numberDisplayTimeout = setTimeout(() => {
-    hideNumberInput();
-  }, 2000);
-}
-
-function hideNumberInput() {
-  const numberDisplay = document.getElementById('numberDisplay');
-  if (numberDisplay) {
-    numberDisplay.style.display = 'none';
-    numberInput = '';
-  }
-}
-
-function handleNumberInput(number) {
-  if (!isPlayerPage) return;
-  
-  // Limit to 4 digits
-  if (numberInput.length >= 4) return;
-  
-  numberInput += number;
-  
-  // Check if the current number input matches any channel number
-  const channelNumber = parseInt(numberInput);
-  const availableChannel = channels.find(ch => ch.channelNo === channelNumber);
-  
-  if (availableChannel) {
-    showNumberInput(numberInput);
-    clearTimeout(numberInputTimeout);
-    numberInputTimeout = setTimeout(() => {
-      const index = channels.indexOf(availableChannel);
-      if (index !== -1) {
-        loadChannel(index);
-      }
-      numberInput = '';
-    }, 2000);
-  } else {
-    // Check if any channel starts with the current input
-    const possibleChannel = channels.some(ch => 
-      ch.channelNo?.toString().startsWith(numberInput)
-    );
-    
-    if (!possibleChannel) {
-      // If no channel exists or could exist with this prefix, clear the input
-      numberInput = number;
-      showNumberInput(numberInput);
-    } else {
-      // Show the current input as we're still potentially building a valid number
-      showNumberInput(numberInput);
-    }
-  }
 }
 
 function toggleListsVisibility(show) {
@@ -377,7 +308,34 @@ function handleNavigation(event) {
 
   // Handle number keys (0-9)
   if (event.key >= '0' && event.key <= '9' && isPlayerPage) {
-    handleNumberInput(event.key);
+    // Pass the complete channels array, not the filtered one
+    handleNumberInput(event.key, channels, (channelIndex) => {
+      // Find the channel in the complete list
+      const selectedChannel = channels[channelIndex];
+      
+      // If we're in a filtered view, find the channel's position in the filtered list
+      if (filteredChannels.length > 0) {
+        const filteredIndex = filteredChannels.findIndex(ch => ch.channelNo === selectedChannel.channelNo);
+        if (filteredIndex !== -1) {
+          // If the channel is in the current filtered view, update the index
+          currentChannelIndex = filteredIndex;
+        } else {
+          // If the channel isn't in the current filter, clear filters and show all channels
+          currentSection = 'home';
+          currentCategory = '';
+          currentLanguage = '';
+          filteredChannels = channels;
+          currentChannelIndex = channelIndex;
+          updateCategoriesList();
+        }
+      } else {
+        // If no filters are active, just update the index
+        currentChannelIndex = channelIndex;
+      }
+      
+      // Load and play the channel
+      loadChannel(currentChannelIndex);
+    });
     return;
   }
 

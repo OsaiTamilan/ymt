@@ -19,11 +19,12 @@ main {
 /* Home Page Styles */
 .home-page {
   background: linear-gradient(to bottom, #1a1a1a, #000);
+  position: relative;
 }
 
 .featured-banner {
   height: auto;
-  min-height: 25vh;
+  min-height: 20vh;
   background: linear-gradient(to right, #000, #1a1a1a);
   padding: 2rem;
   display: flex;
@@ -47,11 +48,17 @@ main {
   font-size: 1.2rem;
 }
 
-.banner-nav {
+/* Main Navigation Bar */
+.main-nav-bar {
   display: flex;
   gap: 2rem;
-  margin: 1.5rem 0;
-  position: relative;
+  padding: 1.5rem 2rem;
+  background: rgba(0, 0, 0, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
 }
 
 .nav-item {
@@ -91,16 +98,17 @@ main {
 .dropdown-menu {
   position: absolute;
   top: 100%;
-  left: 0;
+  left: 300%;
+  transform: translateX(-50%) translateY(-10px);
   margin-top: 0.5rem;
-  min-width: 200px;
+  width: max-content;
+  min-width: 600px;
   background: rgba(30, 30, 30, 0.95);
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-10px);
   transition: all 0.3s ease;
   z-index: 100;
 }
@@ -108,7 +116,7 @@ main {
 .has-dropdown.open .dropdown-menu {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 
 .dropdown-header {
@@ -122,17 +130,24 @@ main {
 }
 
 .language-list {
-  max-height: 300px;
-  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem;
+  max-height: none;
 }
 
 .language-item {
-  padding: 0.8rem 1rem;
+  flex: 0 1 auto;
+  padding: 0.8rem 1.2rem;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
 }
 
 .language-item:hover {
@@ -141,7 +156,7 @@ main {
 
 .language-item.selected {
   background: rgba(0, 255, 0, 0.15);
-  border-left: 2px solid rgba(0, 255, 0, 0.5);
+  border: 1px solid rgba(0, 255, 0, 0.5);
 }
 
 .language-item .material-icons {
@@ -237,7 +252,7 @@ main {
   gap: 0.5rem;
   justify-content: center;
   font-size: 0.9rem;
-  color: #666;
+  color: #00eb04;
 }
 
 .channel-category,
@@ -254,4 +269,18 @@ main {
   padding: 2rem;
   font-size: 1.2rem;
   color: #666;
+}
+
+#numberDisplay {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 2rem;
+  font-weight: bold;
+  display: none;
+  z-index: 1000;
 }

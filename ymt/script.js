@@ -1,3 +1,5 @@
+import { handleNumberInput, showNumberInput, hideNumberInput } from './channelInput.js';
+
 async function fetchPlaylist() {
   try {
     const response = await fetch('../ymt/data/channels.m3u');
@@ -78,23 +80,38 @@ let languageIndex = 0;
 let selectedLanguage = '';
 const COLUMNS = 4;
 
+function getLanguageGridDimensions() {
+  const languages = new Set(channels.map(channel => channel.language));
+  const totalItems = languages.size + 1; // +1 for "All Languages"
+  const columns = Math.min(4, totalItems);
+  const rows = Math.ceil(totalItems / columns);
+  return { columns, rows, totalItems };
+}
+
 function updateLanguageList() {
   const languages = new Set(channels.map(channel => channel.language));
   const languageList = document.querySelector('.language-list');
   if (!languageList) return;
 
+  const sortedLanguages = Array.from(languages).sort();
+  
   languageList.innerHTML = `
     <div class="language-item ${!selectedLanguage ? 'selected' : ''}" data-language="">
       <span>All Languages</span>
       <span class="material-icons">check</span>
     </div>
-    ${Array.from(languages).map(lang => `
+    ${sortedLanguages.map(lang => `
       <div class="language-item ${selectedLanguage === lang ? 'selected' : ''}" data-language="${lang}">
         <span>${lang}</span>
         <span class="material-icons">check</span>
       </div>
     `).join('')}
   `;
+
+  if (isInDropdown) {
+    languageIndex = selectedLanguage ? 
+      sortedLanguages.indexOf(selectedLanguage) + 1 : 0;
+  }
 }
 
 function filterChannels() {
@@ -134,34 +151,56 @@ function updateSelectedNavItem() {
 }
 
 function updateSelectedLanguage() {
-  document.querySelectorAll('.language-item').forEach((item, index) => {
+  const languageItems = document.querySelectorAll('.language-item');
+  languageItems.forEach((item, index) => {
     item.classList.toggle('selected', isInDropdown && index === languageIndex);
   });
 }
 
+function navigateToChannel(channelIndex) {
+  const selectedChannel = channels[channelIndex];
+  if (selectedChannel && selectedChannel.channelNo) {
+    localStorage.setItem('selectedChannelNo', selectedChannel.channelNo.toString());
+    localStorage.setItem('selectedChannelUrl', selectedChannel.url);
+    window.location.href = 'player.html';
+  }
+}
+
 function handleNavigation(event) {
+  // Handle number input (0-9)
+  if (event.key >= '0' && event.key <= '9') {
+    handleNumberInput(event.key, channels, (channelIndex) => {
+      navigateToChannel(channelIndex);
+    });
+    return;
+  }
+
   if (isInDropdown) {
     const languageItems = document.querySelectorAll('.language-item');
+    const totalLanguages = languageItems.length;
+
     switch(event.key) {
-      case 'ArrowUp':
+      case 'ArrowLeft':
         if (languageIndex > 0) {
           languageIndex--;
           updateSelectedLanguage();
         }
         break;
-      case 'ArrowDown':
-        if (languageIndex < languageItems.length - 1) {
+      case 'ArrowRight':
+        if (languageIndex < totalLanguages - 1) {
           languageIndex++;
           updateSelectedLanguage();
         }
         break;
       case 'Enter':
         const selectedItem = languageItems[languageIndex];
-        selectedLanguage = selectedItem.dataset.language;
-        filterChannels();
-        isInDropdown = false;
-        updateSelectedNavItem();
-        updateSelectedLanguage();
+        if (selectedItem) {
+          selectedLanguage = selectedItem.dataset.language;
+          filterChannels();
+          isInDropdown = false;
+          updateSelectedNavItem();
+          updateLanguageList();
+        }
         break;
       case 'Escape':
         isInDropdown = false;
@@ -184,26 +223,18 @@ function handleNavigation(event) {
         }
         break;
       case 'ArrowDown':
-        if (navIndex === 1) { // Filter nav item
-          isInDropdown = true;
-          languageIndex = 0;
-          updateSelectedNavItem();
-          updateSelectedLanguage();
-        } else {
-          isInNav = false;
-          updateSelectedNavItem();
-          updateSelectedCard();
-        }
+        isInNav = false;
+        updateSelectedNavItem();
+        updateSelectedCard();
         break;
       case 'Enter':
         if (navIndex === 1) { // Filter nav item
           isInDropdown = true;
-          languageIndex = 0;
+          languageIndex = 0; // Reset language index when opening dropdown
           updateSelectedNavItem();
           updateSelectedLanguage();
         } else {
-          const selectedNav = navItems[navIndex];
-          const action = selectedNav.querySelector('span:last-child').textContent.toLowerCase();
+          const action = navItems[navIndex].querySelector('span:last-child').textContent.toLowerCase();
           switch(action) {
             case 'home':
               window.location.href = 'index.html';
@@ -220,35 +251,30 @@ function handleNavigation(event) {
     }
   } else {
     const totalChannels = filteredChannels.length;
-    const currentRow = Math.floor(selectedIndex / COLUMNS);
-    const currentCol = selectedIndex % COLUMNS;
-    const totalRows = Math.ceil(totalChannels / COLUMNS);
 
     switch(event.key) {
       case 'ArrowUp':
-        if (currentRow === 0) {
+        if (selectedIndex === 0) {
           isInNav = true;
           updateSelectedNavItem();
           updateSelectedCard();
-        } else if (selectedIndex >= COLUMNS) {
-          selectedIndex -= COLUMNS;
+        } else {
+          selectedIndex = Math.max(0, selectedIndex - COLUMNS);
           updateSelectedCard();
         }
         break;
       case 'ArrowDown':
-        if (currentRow < totalRows - 1 && selectedIndex + COLUMNS < totalChannels) {
-          selectedIndex += COLUMNS;
-          updateSelectedCard();
-        }
+        selectedIndex = Math.min(totalChannels - 1, selectedIndex + COLUMNS);
+        updateSelectedCard();
         break;
       case 'ArrowLeft':
-        if (currentCol > 0) {
+        if (selectedIndex > 0) {
           selectedIndex--;
           updateSelectedCard();
         }
         break;
       case 'ArrowRight':
-        if (currentCol < COLUMNS - 1 && selectedIndex < totalChannels - 1) {
+        if (selectedIndex < totalChannels - 1) {
           selectedIndex++;
           updateSelectedCard();
         }
@@ -256,9 +282,7 @@ function handleNavigation(event) {
       case 'Enter':
         const selectedChannel = filteredChannels[selectedIndex];
         if (selectedChannel && selectedChannel.channelNo) {
-          localStorage.setItem('selectedChannelNo', selectedChannel.channelNo.toString());
-          localStorage.setItem('selectedChannelUrl', selectedChannel.url);
-          window.location.href = 'player.html';
+          navigateToChannel(channels.indexOf(selectedChannel));
         }
         break;
     }
