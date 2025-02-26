@@ -19,7 +19,7 @@ async function loadChannels() {
     const data = await response.text();
     return parseM3U(data);
   } catch (error) {
-    console.error('Error fetching playlist:', error);
+    console.error('Error loading playlist:', error);
     return [];
   }
 }
@@ -72,7 +72,7 @@ function resetAutoHideTimer() {
       listsVisible = false;
       toggleListsVisibility(false);
     }
-  }, 5000); // 5 seconds
+  }, 4000); // 5 seconds
 }
 
 function toggleListsVisibility(show) {

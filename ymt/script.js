@@ -6,7 +6,7 @@ async function fetchPlaylist() {
     const data = await response.text();
     return parseM3U(data);
   } catch (error) {
-    console.error('Error fetching playlist:', error);
+    console.error('Error loading playlist:', error);
     return [];
   }
 }
@@ -46,30 +46,6 @@ function parseM3U(content) {
   return channels;
 }
 
-function createChannelCard(channel) {
-  const card = document.createElement('div');
-  card.className = 'channel-card';
-  card.dataset.channelNo = channel.channelNo;
-  
-  const content = `
-    <div class="channel-logo-container">
-      ${channel.logo 
-        ? `<img src="${channel.logo}" alt="${channel.title}" class="channel-logo">`
-        : `<div class="channel-logo-placeholder">${channel.title[0]}</div>`
-      }
-    </div>
-    <div class="channel-info">
-      <h3>${channel.channelNo ? `${channel.channelNo} - ` : ''}${channel.title}</h3>
-      <div class="channel-meta">
-        <span class="channel-category">${channel.category}</span>
-        <span class="channel-language">${channel.language}</span>
-      </div>
-    </div>`;
-    
-  card.innerHTML = content;
-  return card;
-}
-
 let selectedIndex = 0;
 let channels = [];
 let filteredChannels = [];
@@ -78,7 +54,7 @@ let isInNav = true;
 let isInDropdown = false;
 let languageIndex = 0;
 let selectedLanguage = '';
-const COLUMNS = 4;
+const COLUMNS = 6;
 
 function getLanguageGridDimensions() {
   const languages = new Set(channels.map(channel => channel.language));
@@ -128,11 +104,57 @@ function updateChannelGrid() {
   if (!channelList) return;
 
   channelList.innerHTML = '';
+  
+  // Add Aatral TV card first
+  const aatralCard = document.createElement('div');
+  aatralCard.className = 'channel-card';
+  aatralCard.innerHTML = `
+    <a href="aatral-tv/aatral-tv.html" style="text-decoration: none; color: inherit;">
+      <div class="channel-logo-container">
+        <img src="aatral-tv/data/aatral.png" alt="Aatral TV" class="channel-logo">
+      </div>
+      <div class="channel-info">
+        <h3>Aatral TV</h3>
+        <div class="channel-meta">
+          <span class="channel-category">Entrt.</span>
+          <span class="channel-language">Tamil</span>
+        </div>
+      </div>
+    </a>
+  `;
+  channelList.appendChild(aatralCard);
+  
+  // Add the rest of the channels
   filteredChannels.forEach(channel => {
     channelList.appendChild(createChannelCard(channel));
   });
+  
   selectedIndex = 0;
   updateSelectedCard();
+}
+
+function createChannelCard(channel) {
+  const card = document.createElement('div');
+  card.className = 'channel-card';
+  card.dataset.channelNo = channel.channelNo;
+  
+  const content = `
+    <div class="channel-logo-container">
+      ${channel.logo 
+        ? `<img src="${channel.logo}" alt="${channel.title}" class="channel-logo">`
+        : `<div class="channel-logo-placeholder">${channel.title[0]}</div>`
+      }
+    </div>
+    <div class="channel-info">
+      <h3>${channel.channelNo ? `${channel.channelNo} - ` : ''}${channel.title}</h3>
+      <div class="channel-meta">
+        <span class="channel-category">${channel.category}</span>
+        <span class="channel-language">${channel.language}</span>
+      </div>
+    </div>`;
+    
+  card.innerHTML = content;
+  return card;
 }
 
 function updateSelectedCard() {
@@ -250,7 +272,7 @@ function handleNavigation(event) {
         break;
     }
   } else {
-    const totalChannels = filteredChannels.length;
+    const totalChannels = filteredChannels.length + 1; // +1 for Aatral TV card
 
     switch(event.key) {
       case 'ArrowUp':
@@ -280,9 +302,13 @@ function handleNavigation(event) {
         }
         break;
       case 'Enter':
-        const selectedChannel = filteredChannels[selectedIndex];
-        if (selectedChannel && selectedChannel.channelNo) {
-          navigateToChannel(channels.indexOf(selectedChannel));
+        const selectedCard = document.querySelectorAll('.channel-card')[selectedIndex];
+        if (selectedIndex === 0) {
+          // Aatral TV card
+          window.location.href = 'aatral-tv/aatral-tv.html';
+        } else {
+          const channelIndex = selectedIndex - 1; // Adjust for Aatral TV card
+          navigateToChannel(channelIndex);
         }
         break;
     }
