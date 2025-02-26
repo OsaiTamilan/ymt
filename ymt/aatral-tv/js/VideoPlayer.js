@@ -90,23 +90,40 @@ export class VideoPlayer {
     return index >= 0 ? index : 0;
   }
   
-  async init() {
+  async loadPlaylist(filePath) {
     try {
-      const currentDate = VideoPlayer.getCurrentIndianDate();
-      // Fix the path to be relative to the current directory
-      const response = await fetch(`data/${currentDate}.m3u`);
-      
+      const response = await fetch(filePath);
       if (!response.ok) {
         throw new Error(`Failed to load playlist: ${response.status} ${response.statusText}`);
       }
-      
       const content = await response.text();
-      
       if (!content.trim()) {
         throw new Error('Empty playlist file');
       }
+      return parseM3U(content);
+    } catch (error) {
+      console.error(`Error loading playlist from ${filePath}:`, error.message);
+      return null;
+    }
+  }
+  
+  async init() {
+    try {
+      const currentDate = VideoPlayer.getCurrentIndianDate();
+      // Try loading the current date's playlist first
+      let playlist = await this.loadPlaylist(`data/${currentDate}.m3u`);
       
-      this.playlist = parseM3U(content);
+      // If current date's playlist is not available, try the backup file
+      if (!playlist) {
+        console.log('Current date playlist not found, trying backup file...');
+        playlist = await this.loadPlaylist('data/emergency/backup.m3u');
+        
+        if (!playlist) {
+          throw new Error('Failed to load both current and backup playlists');
+        }
+      }
+      
+      this.playlist = playlist;
       
       if (this.playlist.length === 0) {
         throw new Error('No valid entries in playlist');
