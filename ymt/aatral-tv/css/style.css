@@ -139,7 +139,23 @@ body {
 .ytp-share-button,
 .ytp-watch-later-button,
 .ytp-share-button-visible,
-.ytp-button {
+.ytp-button,
+/* Additional ad-related elements */
+.ytp-ad-overlay-container,
+.ytp-ad-overlay-slot,
+.ytp-ad-text-overlay,
+.ytp-ad-preview-container,
+.ytp-ad-skip-button,
+.ytp-ad-progress-list,
+.video-ads,
+.ytp-ad-progress,
+#player-ads,
+.ytp-ad-module,
+#masthead-ad,
+#player-overlay:has(.ytp-ad-player-overlay-instream-info),
+.ytp-ad-player-overlay-instream-info,
+.ytp-ad-player-overlay-skip-or-preview,
+.ytp-ad-text-overlay-container {
   display: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
