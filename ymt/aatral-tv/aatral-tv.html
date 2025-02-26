@@ -5,7 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Video Player</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/ad.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3814157539218486" crossorigin="anonymous"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGPRE8YK2Q"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-DGPRE8YK2Q');
+    </script>
     <style>
       /* Additional styles to ensure YouTube elements are hidden */
       :root {
@@ -13,6 +24,27 @@
         --yt-spec-brand-background-solid: transparent !important;
         --yt-spec-general-background-a: transparent !important;
         --yt-spec-brand-background-primary: transparent !important;
+      }
+
+      /* Hide all ad-related elements */
+      .ytp-ad-overlay-container,
+      .ytp-ad-overlay-slot,
+      .ytp-ad-text-overlay,
+      .ytp-ad-preview-container,
+      .ytp-ad-skip-button,
+      .ytp-ad-progress-list,
+      .video-ads,
+      .ytp-ad-progress,
+      #player-ads,
+      .ytp-ad-module,
+      #masthead-ad,
+      #player-overlay:has(.ytp-ad-player-overlay-instream-info),
+      .ytp-ad-player-overlay-instream-info,
+      .ytp-ad-player-overlay-skip-or-preview,
+      .ytp-ad-text-overlay-container {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
       }
     </style>
   </head>
@@ -52,7 +84,18 @@
       </div>
       <div id="youtube-player"></div>
     </div>
+    <div class="ad-container">
+      <!-- Horizontal 1 -->
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:728px;height:90px"
+           data-ad-client="ca-pub-3814157539218486"
+           data-ad-slot="3120125697"></ins>
+      <script>
+           (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </div>
     <script type="module" src="js/navBar.js"></script>
     <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/adManager.js"></script>
   </body>
 </html>
