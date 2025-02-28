@@ -20,6 +20,7 @@ main {
 .home-page {
   background: linear-gradient(to bottom, #1a1a1a, #000);
   position: relative;
+  overflow-x: hidden;
 }
 
 .featured-banner {
@@ -59,6 +60,7 @@ main {
   top: 0;
   z-index: 100;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .nav-item {
@@ -176,15 +178,37 @@ main {
 }
 
 .channels-container {
-  padding: 2rem;
+  padding: 1rem;
   min-height: 75vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .channel-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 1.5rem;
-  padding: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 0.5rem;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .channel-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .channel-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+
+@media (min-width: 1600px) {
+  .channel-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
 }
 
 .channel-card {
@@ -194,6 +218,9 @@ main {
   cursor: pointer;
   transition: all 0.3s ease;
   border: 2px solid transparent;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .channel-card:hover {

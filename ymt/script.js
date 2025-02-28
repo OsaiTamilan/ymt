@@ -109,7 +109,7 @@ function updateChannelGrid() {
   const aatralCard = document.createElement('div');
   aatralCard.className = 'channel-card';
   aatralCard.innerHTML = `
-    <a href="aatral-tv/aatral-tv.html" style="text-decoration: none; color: inherit;">
+    <a href="aatral-tv/aatral-tvMobile.html" style="text-decoration: none; color: inherit;">
       <div class="channel-logo-container">
         <img src="aatral-tv/data/aatral.png" alt="Aatral TV" class="channel-logo">
       </div>
@@ -273,6 +273,8 @@ function handleNavigation(event) {
     }
   } else {
     const totalChannels = filteredChannels.length + 1; // +1 for Aatral TV card
+    const channelCards = document.querySelectorAll('.channel-card');
+    const columns = Math.floor(document.querySelector('.channel-grid').clientWidth / channelCards[0]?.clientWidth) || 4;
 
     switch(event.key) {
       case 'ArrowUp':
@@ -280,14 +282,18 @@ function handleNavigation(event) {
           isInNav = true;
           updateSelectedNavItem();
           updateSelectedCard();
-        } else {
-          selectedIndex = Math.max(0, selectedIndex - COLUMNS);
+        } else if (selectedIndex >= columns) {
+          selectedIndex = Math.max(0, selectedIndex - columns);
           updateSelectedCard();
         }
         break;
       case 'ArrowDown':
-        selectedIndex = Math.min(totalChannels - 1, selectedIndex + COLUMNS);
-        updateSelectedCard();
+        if (selectedIndex + columns < channelCards.length) {
+          selectedIndex += columns;
+          updateSelectedCard();
+        } else {
+          selectedIndex = Math.min(channelCards.length - 1, selectedIndex);
+        }
         break;
       case 'ArrowLeft':
         if (selectedIndex > 0) {
@@ -296,7 +302,7 @@ function handleNavigation(event) {
         }
         break;
       case 'ArrowRight':
-        if (selectedIndex < totalChannels - 1) {
+        if (selectedIndex < channelCards.length - 1) {
           selectedIndex++;
           updateSelectedCard();
         }
@@ -305,7 +311,7 @@ function handleNavigation(event) {
         const selectedCard = document.querySelectorAll('.channel-card')[selectedIndex];
         if (selectedIndex === 0) {
           // Aatral TV card
-          window.location.href = 'aatral-tv/aatral-tv.html';
+          window.location.href = 'aatral-tv/aatral-tvMobile.html';
         } else {
           const channelIndex = selectedIndex - 1; // Adjust for Aatral TV card
           navigateToChannel(channelIndex);
