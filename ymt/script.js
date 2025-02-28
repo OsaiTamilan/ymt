@@ -311,7 +311,7 @@ function handleNavigation(event) {
         const selectedCard = document.querySelectorAll('.channel-card')[selectedIndex];
         if (selectedIndex === 0) {
           // Aatral TV card
-          window.location.href = 'aatral-tv/aatral-tvMobile.html';
+          window.location.href = 'aatral-tv/aatral-tv.html';
         } else {
           const channelIndex = selectedIndex - 1; // Adjust for Aatral TV card
           navigateToChannel(channelIndex);
