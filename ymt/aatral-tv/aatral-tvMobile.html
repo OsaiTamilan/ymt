@@ -7,7 +7,6 @@
     <meta name="theme-color" content="#000000" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>Attral TV app</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -27,6 +26,14 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            justify-content: space-between; /* Ensures space is utilized correctly */
+        }
+
+        #player-container {
+            flex: 1; /* Allow the player to expand when space is available */
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .bottom-nav {
@@ -58,27 +65,27 @@
             background-color: #555;
         }
 
-              /* Hide all ad-related elements */
-      .ytp-ad-overlay-container,
-      .ytp-ad-overlay-slot,
-      .ytp-ad-text-overlay,
-      .ytp-ad-preview-container,
-      .ytp-ad-skip-button,
-      .ytp-ad-progress-list,
-      .video-ads,
-      .ytp-ad-progress,
-      #player-ads,
-      .ytp-ad-module,
-      #masthead-ad,
-      #player-overlay:has(.ytp-ad-player-overlay-instream-info),
-      .ytp-ad-player-overlay-instream-info,
-      .ytp-ad-player-overlay-skip-or-preview,
-      .ytp-ad-text-overlay-container {
-        display: none !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-      }
-        
+        /* Hide all ad-related elements */
+        .ytp-ad-overlay-container,
+        .ytp-ad-overlay-slot,
+        .ytp-ad-text-overlay,
+        .ytp-ad-preview-container,
+        .ytp-ad-skip-button,
+        .ytp-ad-progress-list,
+        .video-ads,
+        .ytp-ad-progress,
+        #player-ads,
+        .ytp-ad-module,
+        #masthead-ad,
+        #player-overlay:has(.ytp-ad-player-overlay-instream-info),
+        .ytp-ad-player-overlay-instream-info,
+        .ytp-ad-player-overlay-skip-or-preview,
+        .ytp-ad-text-overlay-container {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
         @media (max-width: 600px) {
             body {
                 font-size: 14px;
@@ -92,18 +99,16 @@
 </head>
 <body>
     <div id="channel-logo">
-      <img src="data/aatral.png" alt="Aatral TV">
+        <img src="data/aatral.png" alt="Aatral TV">
     </div>
-    <div id="player-container">
-      <div id="loading-spinner" class="loading-spinner">
-        <div class="spinner"></div>
-      </div>
-      <div id="youtube-player"></div>
-    </div>
-    <script type="module" src="js/main.js"></script> 
-        
-        
     <main class="player-page">
+        <div id="player-container">
+            <div id="loading-spinner" class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+            <div id="youtube-player"></div>
+        </div>
+
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
             <a href="../playerMobile.html" class="nav-item selected" data-action="home">
@@ -111,7 +116,8 @@
                 <span>Home</span>
             </a>
         </nav>
-
     </main>
+
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
