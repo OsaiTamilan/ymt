@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Aatral TV</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="stylesheet" href="playerMobile.css" />
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  </head>
+  <body>
+    <main class="player-page">
+      <div class="player-container">
+        <!-- Video Player Section -->
+        <div class="video-section">
+          <div class="video-container">
+            <video id="videoPlayer" controls playsinline autoplay></video>
+          </div>
+        </div>
+        
+        <!-- Channel Grid Section -->
+        <div class="channel-grid-section">
+          <!-- Channel Grid -->
+          <div id="channelGrid" class="channel-grid">
+            <!-- Will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Bottom Navigation -->
+      <nav class="bottom-nav">
+        <div class="nav-item selected" data-action="home">
+          <span class="material-icons">home</span>
+          <span>Home</span>
+        </div>
+        <div class="nav-item" data-action="language">
+          <span class="material-icons">language</span>
+          <span>Language</span>
+        </div>
+        <div class="nav-item" data-action="category">
+          <span class="material-icons">category</span>
+          <span>Category</span>
+        </div>
+        <div class="nav-item" data-action="info">
+          <span class="material-icons">info</span>
+          <span>About</span>
+        </div>
+        <div class="nav-item" data-action="settings">
+          <span class="material-icons">tv</span>
+          <span>Aatral TV</span>
+        </div>
+      </nav>
+      
+      <!-- Filter Panel (Hidden by default) -->
+      <div class="filter-panel" id="filterPanel">
+        <div class="filter-header">
+          <h3 id="filterTitle">Select Language</h3>
+          <button class="filter-close" id="filterClose">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+        <div class="filter-options" id="filterOptions">
+          <!-- Will be populated by JavaScript -->
+        </div>
+      </div>
+      
+      <!-- Channel Number Display -->
+      <div id="numberDisplay"></div>
+    </main>
+    
+    <!-- Mobile-specific JavaScript -->
+    <script type="module" src="playerMobile.js"></script>
+  </body>
+</html>
