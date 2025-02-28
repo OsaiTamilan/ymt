@@ -1,6 +1,6 @@
 .nav-ad-container {
   width: 728px;
-  height: 90px;
+  height: 90px !important;
   display: flex;
   align-items: center;
   justify-content: center;
