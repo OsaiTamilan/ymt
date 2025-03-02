@@ -75,16 +75,16 @@ function handleNavigation(event) {
       const action = navItems[navIndex].querySelector('span:last-child').textContent.toLowerCase();
       switch(action) {
         case 'home':
-          window.location.href = '../../ymt/ymt/index.html';
+          window.location.href = '../../ymt/index.html';
           break;
         case 'language':
-          window.location.href = '../../ymt/ymt/player.html';
+          window.location.href = '../../ymt/player.html';
           break;
         case 'category':
-          window.location.href = '../../ymt/ymt/player.html';
+          window.location.href = '../../ymt/player.html';
           break;
         case 'about':
-          window.location.href = '../../ymt/ymt/about.html';
+          window.location.href = '../../ymt/about.html';
           break;
         case 'settings':
           window.location.href = '../../ymt/settings.html';
