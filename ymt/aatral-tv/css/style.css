@@ -40,7 +40,7 @@ body {
   transform: translate(-50%, -50%);
   width: 100%;
   height: 110%;
-  pointer-events: none;
+  pointer-events: auto; /* Allow interaction with the player */
 }
 
 .loading-spinner {
@@ -162,9 +162,19 @@ body {
   pointer-events: none !important;
 }
 
+/* Allow interaction with the YouTube iframe */
 iframe[src*="youtube.com"] {
   border: none !important;
-  pointer-events: none !important;
+  pointer-events: auto !important;
+}
+
+/* Make the YouTube play button visible and clickable */
+.ytp-large-play-button {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 1000 !important;
 }
 
 /* Navigation Bar Styles */
@@ -220,4 +230,40 @@ iframe[src*="youtube.com"] {
 .nav-item.selected {
   background: rgba(0, 255, 0, 0.15);
   border: 1px solid rgba(0, 255, 0, 0.5);
+}
+
+/* Error message styles */
+.error-container {
+  text-align: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  max-width: 80%;
+}
+
+.error-title {
+  font-size: 1.5rem;
+  color: #f87171;
+  margin-bottom: 10px;
+}
+
+.error-message {
+  font-size: 1rem;
+  color: #f3f4f6;
+  margin-bottom: 20px;
+}
+
+.retry-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+  background-color: #2563eb;
 }

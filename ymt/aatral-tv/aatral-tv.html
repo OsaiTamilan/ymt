@@ -46,6 +46,21 @@
         opacity: 0 !important;
         pointer-events: none !important;
       }
+      
+      /* Make sure iframe is clickable on Android TV */
+      iframe[src*="youtube.com"] {
+        border: none !important;
+        pointer-events: auto !important;
+      }
+      
+      /* Make the YouTube play button visible and clickable */
+      .ytp-large-play-button {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        z-index: 1000 !important;
+      }
     </style>
   </head>
   <body>
