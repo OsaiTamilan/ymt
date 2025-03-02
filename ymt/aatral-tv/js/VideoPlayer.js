@@ -14,7 +14,6 @@ export class VideoPlayer {
     this.fallbackVideoId = 'xd5927hV9Ho'; // Fallback video ID as last resort
     this.currentPlaylistSource = null; // Track which playlist source we're using
     this.isAndroidTV = this.detectAndroidTV();
-    this.focusCheckInterval = null;
     this.init();
     this.setupGamepadControls();
   }
@@ -167,12 +166,12 @@ export class VideoPlayer {
     
     // If current date's playlist is not available or empty, try the backup file
     console.log('Current date playlist not found or empty, trying backup file...');
-    playlist = await this.loadPlaylist('data/emergency/backup.m3u');
+    playlist = await this.loadPlaylist('data/emergency/backup.m3u8');
     
     if (playlist && playlist.length > 0) {
       console.log('Successfully loaded backup playlist');
       this.playlist = playlist;
-      this.currentPlaylistSource = 'data/emergency/backup.m3u';
+      this.currentPlaylistSource = 'data/emergency/backup.m3u8';
       return;
     }
     
@@ -258,27 +257,6 @@ export class VideoPlayer {
     }
   }
 
-  startPlayButtonCheck() {
-    // Clear any existing interval
-    if (this.focusCheckInterval) {
-      clearInterval(this.focusCheckInterval);
-    }
-    
-    // Set up an interval to check for the YouTube play button
-    this.focusCheckInterval = setInterval(() => {
-      if (!this.isPlaying) {
-        const iframe = document.querySelector('iframe[src*="youtube.com"]');
-        if (iframe) {
-          // Check if the player state is not playing
-          if (this.player && this.player.getPlayerState && this.player.getPlayerState() !== YT.PlayerState.PLAYING) {
-            console.log('Video not playing, checking for play button');
-            this.focusAndClickYouTubePlayButton();
-          }
-        }
-      }
-    }, 2000); // Check every 2 seconds
-  }
-
   checkGamepad() {
     const gamepads = navigator.getGamepads();
     let gamepad = null;
@@ -343,29 +321,16 @@ export class VideoPlayer {
   initializePlayer() {
     if (!this.playlist.length) return;
     
+    // Automatically create the player without showing the start button
+    this.createPlayer(true);
     if (this.loadingSpinner) {
-      this.loadingSpinner.innerHTML = `
-        <div class="spinner"></div>
-        <button class="play-button" id="start-playback" autofocus tabindex="0">
-          Press Enter to Play ►
-        </button>
-      `;
-      
-      const startButton = document.getElementById('start-playback');
-      startButton.addEventListener('click', () => {
-        this.createPlayer(true);
-        this.loadingSpinner.style.display = 'none';
-        // Show navigation bar after clicking start
-        const mainNav = document.querySelector('.main-nav');
-        mainNav.classList.add('visible');
-        // Start the auto-hide timer
-        const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
-        document.dispatchEvent(event);
-      });
-      
-      setTimeout(() => {
-        startButton.focus();
-      }, 100);
+      this.loadingSpinner.style.display = 'none';
+    }
+    
+    // Show navigation bar
+    const mainNav = document.querySelector('.main-nav');
+    if (mainNav) {
+      mainNav.classList.add('visible');
     }
   }
 
@@ -444,14 +409,9 @@ export class VideoPlayer {
         } catch (e) {
           console.log('Fullscreen request failed:', e);
         }
-        
-        // Start checking for play button
-        this.startPlayButtonCheck();
       }, 1000);
     } else {
       this.player.playVideo();
-      // Start checking for play button
-      this.startPlayButtonCheck();
     }
     
     this.startTimeCheck();
@@ -609,7 +569,7 @@ export class VideoPlayer {
       if (this.currentPlaylistSource === `data/${VideoPlayer.getCurrentIndianDate()}.m3u`) {
         // If we're using the current date playlist, try the backup
         this.loadBackupPlaylist();
-      } else if (this.currentPlaylistSource === 'data/emergency/backup.m3u') {
+      } else if (this.currentPlaylistSource === 'data/emergency/backup.m3u8') {
         // If we're using the backup playlist, try the fallback video
         this.tryFallbackVideo();
       } else {
@@ -650,10 +610,10 @@ export class VideoPlayer {
       this.loadingSpinner.style.display = 'block';
     }
     
-    const playlist = await this.loadPlaylist('data/emergency/backup.m3u');
+    const playlist = await this.loadPlaylist('data/emergency/backup.m3u8');
     if (playlist && playlist.length > 0) {
       this.playlist = playlist;
-      this.currentPlaylistSource = 'data/emergency/backup.m3u';
+      this.currentPlaylistSource = 'data/emergency/backup.m3u8';
       this.currentIndex = 0;
       this.retryCount = 0;
       

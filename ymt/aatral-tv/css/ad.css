@@ -5,7 +5,7 @@
   transform: translateX(-50%);
   width: 728px;
   height: 90px;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.01);
   border-radius: 8px;
   display: flex;
   align-items: center;

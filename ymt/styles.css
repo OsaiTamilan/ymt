@@ -187,27 +187,35 @@ main {
 
 .channel-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   padding: 0.5rem;
   width: 100%;
 }
 
-@media (min-width: 768px) {
+/* Smart TV specific styles */
+@media (min-width: 1280px) {
   .channel-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1920px) {
   .channel-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
-@media (min-width: 1600px) {
+/* Mobile and tablet styles */
+@media (max-width: 768px) {
   .channel-grid {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1279px) {
+  .channel-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -221,6 +229,8 @@ main {
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
 }
 
 .channel-card:hover {
@@ -231,6 +241,8 @@ main {
   background: rgba(0, 255, 0, 0.15);
   border: 2px solid rgba(0, 255, 0, 0.5);
   transform: scale(1.05);
+  z-index: 10;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
 }
 
 .channel-logo-container {
@@ -264,6 +276,10 @@ main {
 
 .channel-info {
   text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .channel-info h3 {
@@ -310,4 +326,14 @@ main {
   font-weight: bold;
   display: none;
   z-index: 1000;
+}
+
+/* Smart TV specific focus styles */
+@media (hover: none) {
+  .channel-card:focus,
+  .channel-card:focus-visible {
+    background: rgba(0, 255, 0, 0.15);
+    border: 2px solid rgba(0, 255, 0, 0.5);
+    outline: none;
+  }
 }

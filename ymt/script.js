@@ -2,7 +2,7 @@ import { handleNumberInput, showNumberInput, hideNumberInput } from './channelIn
 
 async function fetchPlaylist() {
   try {
-    const response = await fetch('../ymt/data/channels.m3u');
+    const response = await fetch('data/channels.m3u');
     const data = await response.text();
     return parseM3U(data);
   } catch (error) {
@@ -54,7 +54,21 @@ let isInNav = true;
 let isInDropdown = false;
 let languageIndex = 0;
 let selectedLanguage = '';
-const COLUMNS = 6;
+let gridColumns = 4; // Default value, will be calculated based on screen size
+
+// Detect if we're on a Smart TV
+const isSmartTV = () => {
+  const userAgent = navigator.userAgent.toLowerCase();
+  return (
+    userAgent.includes('smart-tv') || 
+    userAgent.includes('tv') || 
+    userAgent.includes('android tv') || 
+    userAgent.includes('hbbtv') || 
+    userAgent.includes('netcast') || 
+    userAgent.includes('viera') || 
+    userAgent.includes('webos')
+  );
+};
 
 function getLanguageGridDimensions() {
   const languages = new Set(channels.map(channel => channel.language));
@@ -99,6 +113,27 @@ function filterChannels() {
   updateChannelGrid();
 }
 
+function calculateGridColumns() {
+  const container = document.querySelector('.channels-container');
+  if (!container) return 4;
+  
+  const containerWidth = container.clientWidth;
+  
+  // For Smart TVs, use a simpler grid with fewer columns
+  if (isSmartTV()) {
+    if (containerWidth < 1280) return 3;
+    if (containerWidth < 1920) return 4;
+    return 5;
+  }
+  
+  // For regular browsers
+  if (containerWidth < 768) return 2;
+  if (containerWidth < 1024) return 3;
+  if (containerWidth < 1440) return 4;
+  if (containerWidth < 1920) return 5;
+  return 6;
+}
+
 function updateChannelGrid() {
   const channelList = document.getElementById('channelList');
   if (!channelList) return;
@@ -108,8 +143,9 @@ function updateChannelGrid() {
   // Add Aatral TV card first
   const aatralCard = document.createElement('div');
   aatralCard.className = 'channel-card';
+  aatralCard.dataset.index = '0';
   aatralCard.innerHTML = `
-    <a href="aatral-tv/aatral-tvMobile.html" style="text-decoration: none; color: inherit;">
+    <a href="aatral-tv/aatral-tv.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
       <div class="channel-logo-container">
         <img src="aatral-tv/data/aatral.png" alt="Aatral TV" class="channel-logo">
       </div>
@@ -125,18 +161,24 @@ function updateChannelGrid() {
   channelList.appendChild(aatralCard);
   
   // Add the rest of the channels
-  filteredChannels.forEach(channel => {
-    channelList.appendChild(createChannelCard(channel));
+  filteredChannels.forEach((channel, index) => {
+    const card = createChannelCard(channel, index + 1); // +1 because Aatral TV is index 0
+    channelList.appendChild(card);
   });
+  
+  // Calculate grid columns based on container width
+  gridColumns = calculateGridColumns();
+  console.log(`Grid columns: ${gridColumns}`);
   
   selectedIndex = 0;
   updateSelectedCard();
 }
 
-function createChannelCard(channel) {
+function createChannelCard(channel, index) {
   const card = document.createElement('div');
   card.className = 'channel-card';
   card.dataset.channelNo = channel.channelNo;
+  card.dataset.index = index.toString();
   
   const content = `
     <div class="channel-logo-container">
@@ -158,8 +200,9 @@ function createChannelCard(channel) {
 }
 
 function updateSelectedCard() {
-  document.querySelectorAll('.channel-card').forEach((card, index) => {
-    card.classList.toggle('selected', !isInNav && !isInDropdown && index === selectedIndex);
+  document.querySelectorAll('.channel-card').forEach((card) => {
+    const cardIndex = parseInt(card.dataset.index || '0');
+    card.classList.toggle('selected', !isInNav && !isInDropdown && cardIndex === selectedIndex);
   });
 }
 
@@ -272,9 +315,8 @@ function handleNavigation(event) {
         break;
     }
   } else {
-    const totalChannels = filteredChannels.length + 1; // +1 for Aatral TV card
     const channelCards = document.querySelectorAll('.channel-card');
-    const columns = Math.floor(document.querySelector('.channel-grid').clientWidth / channelCards[0]?.clientWidth) || 4;
+    const totalCards = channelCards.length;
 
     switch(event.key) {
       case 'ArrowUp':
@@ -282,17 +324,16 @@ function handleNavigation(event) {
           isInNav = true;
           updateSelectedNavItem();
           updateSelectedCard();
-        } else if (selectedIndex >= columns) {
-          selectedIndex = Math.max(0, selectedIndex - columns);
+        } else if (selectedIndex >= gridColumns) {
+          selectedIndex = Math.max(0, selectedIndex - gridColumns);
           updateSelectedCard();
         }
         break;
       case 'ArrowDown':
-        if (selectedIndex + columns < channelCards.length) {
-          selectedIndex += columns;
+        const nextRowIndex = selectedIndex + gridColumns;
+        if (nextRowIndex < totalCards) {
+          selectedIndex = nextRowIndex;
           updateSelectedCard();
-        } else {
-          selectedIndex = Math.min(channelCards.length - 1, selectedIndex);
         }
         break;
       case 'ArrowLeft':
@@ -302,27 +343,46 @@ function handleNavigation(event) {
         }
         break;
       case 'ArrowRight':
-        if (selectedIndex < channelCards.length - 1) {
+        if (selectedIndex < totalCards - 1) {
           selectedIndex++;
           updateSelectedCard();
         }
         break;
       case 'Enter':
-        const selectedCard = document.querySelectorAll('.channel-card')[selectedIndex];
-        if (selectedIndex === 0) {
-          // Aatral TV card
-          window.location.href = 'aatral-tv/aatral-tv.html';
-        } else {
-          const channelIndex = selectedIndex - 1; // Adjust for Aatral TV card
-          navigateToChannel(channelIndex);
+        const selectedCard = channelCards[selectedIndex];
+        if (selectedCard) {
+          if (selectedIndex === 0) {
+            // Aatral TV card
+            window.location.href = 'aatral-tv/aatral-tv.html';
+          } else {
+            const channelIndex = selectedIndex - 1; // Adjust for Aatral TV card
+            navigateToChannel(channelIndex);
+          }
         }
         break;
     }
   }
 
+  // Ensure the selected card is visible
   const selectedCard = document.querySelector('.channel-card.selected');
   if (selectedCard) {
     selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+// Handle window resize to recalculate grid columns
+function handleResize() {
+  const oldColumns = gridColumns;
+  const newColumns = calculateGridColumns();
+  
+  if (oldColumns !== newColumns) {
+    gridColumns = newColumns;
+    console.log(`Grid columns updated: ${gridColumns}`);
+    
+    // If we're in the grid, make sure the selected index is still valid
+    if (!isInNav && !isInDropdown) {
+      updateSelectedCard();
+    }
   }
 }
 
@@ -341,7 +401,32 @@ async function initializeChannelList() {
   updateLanguageList();
   updateChannelGrid();
   updateSelectedNavItem();
+  
+  // Add event listeners
   document.addEventListener('keydown', handleNavigation);
+  window.addEventListener('resize', handleResize);
+  
+  // For Smart TVs, add special handling for remote control
+  if (isSmartTV()) {
+    console.log('Smart TV detected, adding special remote control handling');
+    
+    // Some Smart TVs use different events for remote control
+    document.addEventListener('keypress', (e) => {
+      // Map common Smart TV remote control keys to standard keys
+      let key = e.key;
+      
+      // WebOS, Tizen, etc. might use different key codes
+      if (e.keyCode === 13 || e.keyCode === 32) key = 'Enter';
+      if (e.keyCode === 37) key = 'ArrowLeft';
+      if (e.keyCode === 38) key = 'ArrowUp';
+      if (e.keyCode === 39) key = 'ArrowRight';
+      if (e.keyCode === 40) key = 'ArrowDown';
+      
+      if (key !== e.key) {
+        handleNavigation({ key });
+      }
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
