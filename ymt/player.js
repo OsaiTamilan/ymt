@@ -1,5 +1,4 @@
 import { handleNumberInput } from './channelInput.js';
-import { isSmartTV, logDeviceInfo } from './js/tvDetection.js';
 
 let currentChannelIndex = 0;
 let channels = [];
@@ -73,7 +72,7 @@ function resetAutoHideTimer() {
       listsVisible = false;
       toggleListsVisibility(false);
     }
-  }, 4000); // 4 seconds
+  }, 4000); // 5 seconds
 }
 
 function toggleListsVisibility(show) {
@@ -125,17 +124,24 @@ function updateCategoriesList() {
     const div = document.createElement('div');
     div.className = 'category-item';
     div.dataset.index = index;
-    div.setAttribute('tabindex', '0');
-    div.setAttribute('role', 'button');
-    
+    div.setAttribute('tabindex', '0'); // Make focusable for TV remotes
     if ((currentSection === 'category' && item === currentCategory) ||
         (currentSection === 'language' && item === currentLanguage)) {
       div.classList.add('selected');
     }
-    
     div.textContent = item;
     
-    // Add keyboard event listener for Enter key
+    // Add click event
+    div.addEventListener('click', () => {
+      if (currentSection === 'category') {
+        currentCategory = item;
+      } else if (currentSection === 'language') {
+        currentLanguage = item;
+      }
+      updateChannelList();
+    });
+    
+    // Add keyboard event for Enter key
     div.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.keyCode === 13) {
         if (currentSection === 'category') {
@@ -145,16 +151,6 @@ function updateCategoriesList() {
         }
         updateChannelList();
       }
-    });
-    
-    // Add click event listener
-    div.addEventListener('click', () => {
-      if (currentSection === 'category') {
-        currentCategory = item;
-      } else if (currentSection === 'language') {
-        currentLanguage = item;
-      }
-      updateChannelList();
     });
     
     categoriesList.appendChild(div);
@@ -193,9 +189,7 @@ function createChannelElement(channel, index) {
   element.className = 'channel-item';
   element.dataset.index = index;
   element.dataset.channelNo = channel.channelNo;
-  element.setAttribute('tabindex', '0');
-  element.setAttribute('role', 'button');
-  
+  element.setAttribute('tabindex', '0'); // Make focusable for TV remotes
   if (index === currentChannelIndex) element.classList.add('selected');
   
   element.innerHTML = `
@@ -205,18 +199,16 @@ function createChannelElement(channel, index) {
     </div>
   `;
   
-  // Add keyboard event listener for Enter key
-  element.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.keyCode === 13) {
-      currentChannelIndex = index;
-      loadChannel(currentChannelIndex);
-    }
+  // Add click event
+   element.addEventListener('click', () => {
+    loadChannel(index);
   });
   
-  // Add click event listener
-  element.addEventListener('click', () => {
-    currentChannelIndex = index;
-    loadChannel(currentChannelIndex);
+  // Add keyboard event for Enter key
+  element.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      loadChannel(index);
+    }
   });
   
   return element;
@@ -346,15 +338,29 @@ function navigateToPlayer() {
 }
 
 function handleNavigation(event) {
+  // Log key events for debugging
+  console.log('Key event:', event.key, event.keyCode);
+  
   // Reset auto-hide timer on any navigation
   if (isPlayerPage && listsVisible) {
     resetAutoHideTimer();
   }
 
   // Handle number keys (0-9)
-  if (event.key >= '0' && event.key <= '9' && isPlayerPage) {
+  if ((event.key >= '0' && event.key <= '9') || 
+      (event.keyCode >= 48 && event.keyCode <= 57) || 
+      (event.keyCode >= 96 && event.keyCode <= 105)) {
+    
+    // Convert keyCode to number string if needed
+    let numberKey = event.key;
+    if (event.keyCode >= 48 && event.keyCode <= 57) {
+      numberKey = String(event.keyCode - 48);
+    } else if (event.keyCode >= 96 && event.keyCode <= 105) {
+      numberKey = String(event.keyCode - 96);
+    }
+    
     // Pass the complete channels array, not the filtered one
-    handleNumberInput(event.key, channels, (channelIndex) => {
+    handleNumberInput(numberKey, channels, (channelIndex) => {
       // Find the channel in the complete list
       const selectedChannel = channels[channelIndex];
       
@@ -384,23 +390,34 @@ function handleNavigation(event) {
     return;
   }
 
+  // Map common TV remote keys to standard keys
+  let key = event.key;
+  
+  // WebOS, Tizen, etc. might use different key codes
+  if (event.keyCode === 13) key = 'Enter';
+  if (event.keyCode === 37) key = 'ArrowLeft';
+  if (event.keyCode === 38) key = 'ArrowUp';
+  if (event.keyCode === 39) key = 'ArrowRight';
+  if (event.keyCode === 40) key = 'ArrowDown';
+  if (event.keyCode === 8 || event.keyCode === 27 || event.keyCode === 461) key = 'Back';
+
   if (isPlayerPage && !listsVisible) {
-    if (event.key === 'ArrowRight') {
+    if (key === 'ArrowRight') {
       toggleListsVisibility(true);
       return;
     }
-    if (event.key === 'ArrowUp') {
+    if (key === 'ArrowUp') {
       changeChannel(-1);
       return;
     }
-    if (event.key === 'ArrowDown') {
+    if (key === 'ArrowDown') {
       changeChannel(1);
       return;
     }
     return;
   }
 
-  switch(event.key) {
+  switch(key) {
     case 'ArrowLeft':
       if (activeColumn === 0 && isPlayerPage) {
         listsVisible = false;
@@ -465,7 +482,7 @@ function handleNavigation(event) {
         const selectedNav = navItems[currentNavIndex];
         const section = selectedNav.querySelector('span:last-child').textContent.toLowerCase();
         
-        if ( section === 'home') {
+        if (section === 'home') {
           navigateToPage('index.html');
         } else if (section === 'about') {
           navigateToPage('about.html');
@@ -479,6 +496,16 @@ function handleNavigation(event) {
       } else if (activeColumn === 2 && isPlayerPage) {
         listsVisible = false;
         loadChannel(currentChannelIndex);
+      }
+      break;
+      
+    case 'Back':
+    case 'Escape':
+      if (isPlayerPage) {
+        listsVisible = false;
+        toggleListsVisibility(false);
+      } else {
+        navigateToPage('index.html');
       }
       break;
   }
@@ -512,71 +539,112 @@ function ensureChannelVisible(index) {
   }
 }
 
+// Setup gamepad support for TV remotes
+function setupGamepadSupport() {
+  let gamepadState = {};
+  
+  function checkGamepads() {
+    const gamepads = navigator.getGamepads();
+    
+    for (let i = 0; i < gamepads.length; i++) {
+      const gamepad = gamepads[i];
+      if (!gamepad) continue;
+      
+      // Initialize state for this gamepad if needed
+      if (!gamepadState[gamepad.index]) {
+        gamepadState[gamepad.index] = {
+          buttons: Array(gamepad.buttons.length).fill(false),
+          axes: Array(gamepad.axes.length).fill(0)
+        };
+      }
+      
+      // Check buttons
+      for (let j = 0; j < gamepad.buttons.length; j++) {
+        const buttonPressed = gamepad.buttons[j].pressed;
+        
+        // Button was just pressed (not held down)
+        if (buttonPressed && !gamepadState[gamepad.index].buttons[j]) {
+          handleGamepadButton(j);
+        }
+        
+        // Update state
+        gamepadState[gamepad.index].buttons[j] = buttonPressed;
+      }
+      
+      // Check axes (D-pad is often on axes)
+      for (let j = 0; j < gamepad.axes.length; j++) {
+        const axisValue = gamepad.axes[j];
+        const prevValue = gamepadState[gamepad.index].axes[j];
+        
+        // Detect significant change in axis value
+        if (Math.abs(axisValue - prevValue) > 0.5) {
+          handleGamepadAxis(j, axisValue);
+        }
+        
+        // Update state
+        gamepadState[gamepad.index].axes[j] = axisValue;
+      }
+    }
+    
+    requestAnimationFrame(checkGamepads);
+  }
+  
+  function handleGamepadButton(buttonIndex) {
+    console.log('Gamepad button pressed:', buttonIndex);
+    
+    // Map common gamepad buttons to keys
+    switch (buttonIndex) {
+      case 0: // A button (typically primary/select)
+        handleNavigation({ key: 'Enter', keyCode: 13 });
+        break;
+      case 1: // B button (typically back/cancel)
+        handleNavigation({ key: 'Back', keyCode: 27 });
+        break;
+      case 12: // D-pad up
+        handleNavigation({ key: 'ArrowUp', keyCode: 38 });
+        break;
+      case 13: // D-pad down
+        handleNavigation({ key: 'ArrowDown', keyCode: 40 });
+        break;
+      case 14: // D-pad left
+        handleNavigation({ key: 'ArrowLeft', keyCode: 37 });
+        break;
+      case 15: // D-pad right
+        handleNavigation({ key: 'ArrowRight', keyCode: 39 });
+        break;
+    }
+  }
+  
+  function handleGamepadAxis(axisIndex, value) {
+    console.log('Gamepad axis changed:', axisIndex, value);
+    
+    // First two axes are typically left stick
+    if (axisIndex === 0 && value < -0.7) handleNavigation({ key: 'ArrowLeft', keyCode: 37 });
+    if (axisIndex === 0 && value > 0.7) handleNavigation({ key: 'ArrowRight', keyCode: 39 });
+    if (axisIndex === 1 && value < -0.7) handleNavigation({ key: 'ArrowUp', keyCode: 38 });
+    if (axisIndex === 1 && value > 0.7) handleNavigation({ key: 'ArrowDown', keyCode: 40 });
+  }
+  
+  window.addEventListener('gamepadconnected', (e) => {
+    console.log('Gamepad connected:', e.gamepad.id);
+    checkGamepads();
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   isPlayerPage = document.getElementById('videoPlayer') !== null;
   
-  // Log device info
-  logDeviceInfo();
+  channels = await loadChannels();
   
   if (isPlayerPage) {
-    channels = await loadChannels();
-    
-    // Add tabindex and role attributes to nav items
-    document.querySelectorAll('.nav-item').forEach(item => {
-      item.setAttribute('tabindex', '0');
-      item.setAttribute('role', 'button');
-      
-      // Add keyboard event listener for Enter key
-      item.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.keyCode === 13) {
-          const section = item.querySelector('span:last-child').textContent.toLowerCase();
-          if (section === 'home') {
-            navigateToPage('index.html');
-          } else if (section === 'about') {
-            navigateToPage('about.html');
-          } else if (section === 'settings') {
-            navigateToPage('settings.html');
-          } else if (section === 'language' || section === 'category') {
-            currentSection = section;
-            currentCategory = '';
-            currentLanguage = '';
-            updateCategoriesList();
-            updateChannelList();
-          }
-        }
-      });
-    });
-    
     updateCategoriesList();
     updateChannelList();
     updateActiveColumn();
     
     playSelectedChannel();
     
-    // Special handling for TV remote controls
-    if (isSmartTV()) {
-      console.log('Smart TV detected, adding special remote control handling');
-      
-      // Add special handling for TV remote control events
-      document.addEventListener('keypress', (e) => {
-        console.log('Keypress event:', e.key, e.keyCode);
-        
-        // Map common Smart TV remote control keys to standard keys
-        let key = e.key;
-        
-        // WebOS, Tizen, etc. might use different key codes
-        if (e.keyCode === 13 || e.keyCode === 32) key = 'Enter';
-        if (e.keyCode === 37) key = 'ArrowLeft';
-        if (e.keyCode === 38) key = 'ArrowUp';
-        if (e.keyCode === 39) key = 'ArrowRight';
-        if (e.keyCode === 40) key = 'ArrowDown';
-        if (e.keyCode === 8 || e.keyCode === 27 || e.keyCode === 461) key = 'Back';
-        
-        if (key !== e.key) {
-          handleNavigation({ key });
-        }
-      });
-    }
+    // Setup gamepad support
+    setupGamepadSupport();
   }
 });
 

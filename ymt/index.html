@@ -17,6 +17,44 @@
           <p class="navigation-hint">Use arrow keys to navigate, Enter to select, or type channel number directly</p>
         </div>
       </div>
+      <nav class="main-nav-bar">
+        <div class="nav-item selected" tabindex="0" role="button" aria-label="Home">
+          <span class="material-icons">home</span>
+          <span>Home</span>
+          <div class="tv-focus-indicator"></div>
+        </div>
+        <div class="nav-item has-dropdown" tabindex="0" role="button" aria-label="Filter">
+          <span class="material-icons">filter_list</span>
+          <span>Filter</span>
+          <div class="tv-focus-indicator"></div>
+          <div class="dropdown-menu">
+            <div class="dropdown-header">
+              <span class="material-icons">language</span>
+              <span>Languages</span>
+            </div>
+            <div class="language-list">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+        <div class="nav-item" tabindex="0" role="button" aria-label="About">
+          <span class="material-icons">info</span>
+          <span>About</span>
+          <div class="tv-focus-indicator"></div>
+        </div>
+        <div class="nav-item" tabindex="0" role="button" aria-label="Settings">
+          <span class="material-icons">settings</span>
+          <span>Settings</span>
+          <div class="tv-focus-indicator"></div>
+        </div>
+        <div class="nav-item" tabindex="0" role="button" aria-label="Aatral TV">
+          <a href="aatral-tv/aatral-tv.html" style="display: flex; align-items: center; padding: 10px 20px; background: rgba(0, 255, 0, 0.15); border: 1px solid rgba(0, 255, 0, 0.5); border-radius: 4px; color: white; text-decoration: none;">
+            <span class="material-icons" style="margin-right: 5px;">tv</span>
+            Watch Aatral TV
+          </a>
+          <div class="tv-focus-indicator"></div>
+        </div>
+      </nav>
       <div class="channels-container">
         <div id="channelList" class="channel-grid">
           <div class="loading">Loading channels...</div>
