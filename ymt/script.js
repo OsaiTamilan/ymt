@@ -58,6 +58,7 @@ let gridColumns = 4; // Default value, will be calculated based on screen size
 let lastKeyTime = 0;
 let lastKey = '';
 let keyRepeatDelay = 300; // Delay in ms to prevent multiple key presses
+let tvRemoteDebug = true; // Enable TV remote debugging
 
 // Detect if we're on a Smart TV
 const isSmartTV = () => {
@@ -74,9 +75,9 @@ const isSmartTV = () => {
   );
 };
 
-// Log device info for debugging
-console.log(`Device Info - User Agent: ${navigator.userAgent}`);
-console.log(`Is Smart TV detected: ${isSmartTV()}`);
+// Log if we're on a Smart TV
+console.log(`Is Smart TV: ${isSmartTV()}`);
+console.log(`User Agent: ${navigator.userAgent}`);
 
 function getLanguageGridDimensions() {
   const languages = new Set(channels.map(channel => channel.language));
@@ -97,13 +98,11 @@ function updateLanguageList() {
     <div class="language-item ${!selectedLanguage ? 'selected' : ''}" data-language="" tabindex="0">
       <span>All Languages</span>
       <span class="material-icons">check</span>
-      <div class="tv-focus-indicator"></div>
     </div>
     ${sortedLanguages.map(lang => `
       <div class="language-item ${selectedLanguage === lang ? 'selected' : ''}" data-language="${lang}" tabindex="0">
         <span>${lang}</span>
         <span class="material-icons">check</span>
-        <div class="tv-focus-indicator"></div>
       </div>
     `).join('')}
   `;
@@ -170,7 +169,7 @@ function updateChannelGrid() {
 
   channelList.innerHTML = '';
   
-  // Add the channels from m3u data
+  // Add the channels from m3u data only
   filteredChannels.forEach((channel, index) => {
     const card = createChannelCard(channel, index);
     channelList.appendChild(card);
@@ -204,8 +203,7 @@ function createChannelCard(channel, index) {
         <span class="channel-category">${channel.category}</span>
         <span class="channel-language">${channel.language}</span>
       </div>
-    </div>
-    <div class="tv-focus-indicator"></div>`;
+    </div>`;
   
   // Add click event
   card.addEventListener('click', () => {
@@ -214,19 +212,11 @@ function createChannelCard(channel, index) {
   
   // Add keyboard event for Enter key
   card.addEventListener('keydown', (e) => {
-    console.log('Channel card keydown:', e.key, e.keyCode);
+    if (tvRemoteDebug) console.log('Channel card keydown:', e.key, e.keyCode);
     
     if (e.key === 'Enter' || e.keyCode === 13) {
       e.preventDefault(); // Prevent default to ensure the action happens
       navigateToChannel(index);
-    }
-  });
-  
-  // Add focus event to update selection
-  card.addEventListener('focus', () => {
-    if (!isInNav && !isInDropdown) {
-      selectedIndex = index;
-      updateSelectedCard();
     }
   });
   
@@ -243,7 +233,7 @@ function updateSelectedCard() {
       setTimeout(() => {
         try {
           card.focus();
-          console.log('Focused card:', cardIndex);
+          if (tvRemoteDebug) console.log('Focused card:', cardIndex);
         } catch (e) {
           console.error('Error focusing card:', e);
         }
@@ -264,7 +254,7 @@ function updateSelectedNavItem() {
       setTimeout(() => {
         try {
           item.focus();
-          console.log('Focused nav item:', index);
+          if (tvRemoteDebug) console.log('Focused nav item:', index);
         } catch (e) {
           console.error('Error focusing nav item:', e);
         }
@@ -283,7 +273,7 @@ function updateSelectedLanguage() {
       setTimeout(() => {
         try {
           item.focus();
-          console.log('Focused language item:', index);
+          if (tvRemoteDebug) console.log('Focused language item:', index);
         } catch (e) {
           console.error('Error focusing language item:', e);
         }
@@ -293,7 +283,7 @@ function updateSelectedLanguage() {
 }
 
 function navigateToChannel(channelIndex) {
-  console.log('Navigating to channel:', channelIndex);
+  if (tvRemoteDebug) console.log('Navigating to channel:', channelIndex);
   
   const selectedChannel = filteredChannels[channelIndex];
   if (selectedChannel && selectedChannel.channelNo) {
@@ -306,14 +296,16 @@ function navigateToChannel(channelIndex) {
 // Unified key event handler for all input types
 function handleKeyEvent(event) {
   // For debugging on TV devices
-  console.log('Key event:', {
-    type: event.type,
-    key: event.key,
-    keyCode: event.keyCode,
-    code: event.code,
-    target: event.target.tagName,
-    targetClass: event.target.className
-  });
+  if (tvRemoteDebug) {
+    console.log('Key event:', {
+      type: event.type,
+      key: event.key,
+      keyCode: event.keyCode,
+      code: event.code,
+      target: event.target.tagName,
+      targetClass: event.target.className
+    });
+  }
   
   // Prevent key repeat (important for TV remotes)
   const now = Date.now();
@@ -448,7 +440,6 @@ function handleNavBarNavigation(key) {
             break;
           case 'tv':
           case 'aatral tv':
-          case 'watch aatral tv':
             window.location.href = 'aatral-tv/aatral-tv.html';
             break;
         }
@@ -562,7 +553,6 @@ function setupClickHandlers() {
             break;
           case 'tv':
           case 'aatral tv':
-          case 'watch aatral tv':
             window.location.href = 'aatral-tv/aatral-tv.html';
             break;
         }
@@ -622,7 +612,7 @@ function setupGamepadSupport() {
   }
   
   function handleGamepadButton(buttonIndex) {
-    console.log('Gamepad button pressed:', buttonIndex);
+    if (tvRemoteDebug) console.log('Gamepad button pressed:', buttonIndex);
     
     // Map common gamepad buttons to keys
     switch (buttonIndex) {
@@ -648,7 +638,7 @@ function setupGamepadSupport() {
   }
   
   function handleGamepadAxis(axisIndex, value) {
-    console.log('Gamepad axis changed:', axisIndex, value);
+    if (tvRemoteDebug) console.log('Gamepad axis changed:', axisIndex, value);
     
     // First two axes are typically left stick
     if (axisIndex === 0 && value < -0.7) processNavigation('ArrowLeft');
@@ -694,32 +684,34 @@ async function initializeChannelList() {
     console.log('Smart TV detected, adding special TV remote handling');
     
     // Add a visible focus indicator for debugging
-    const style = document.createElement('style');
-    style.textContent = `
-      .debug-focus-indicator {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: rgba(255, 0, 0, 0.7);
-        color: white;
-        padding: 5px 10px;
-        border-radius: 4px;
-        font-size: 12px;
-        z-index: 9999;
-      }
-    `;
-    document.head.appendChild(style);
-    
-    const indicator = document.createElement('div');
-    indicator.className = 'debug-focus-indicator';
-    indicator.textContent = 'Focus: None';
-    document.body.appendChild(indicator);
-    
-    // Update the indicator when focus changes
-    setInterval(() => {
-      const activeElement = document.activeElement;
-      indicator.textContent = `Focus: ${activeElement.tagName} ${activeElement.className}`;
-    }, 500);
+    if (tvRemoteDebug) {
+      const style = document.createElement('style');
+      style.textContent = `
+        .debug-focus-indicator {
+          position: fixed;
+          top: 10px;
+          right: 10px;
+          background: rgba(255, 0, 0, 0.7);
+          color: white;
+          padding: 5px 10px;
+          border-radius: 4px;
+          font-size: 12px;
+          z-index: 9999;
+        }
+      `;
+      document.head.appendChild(style);
+      
+      const indicator = document.createElement('div');
+      indicator.className = 'debug-focus-indicator';
+      indicator.textContent = 'Focus: None';
+      document.body.appendChild(indicator);
+      
+      // Update the indicator when focus changes
+      setInterval(() => {
+        const activeElement = document.activeElement;
+        indicator.textContent = `Focus: ${activeElement.tagName} ${activeElement.className}`;
+      }, 500);
+    }
   }
 }
 

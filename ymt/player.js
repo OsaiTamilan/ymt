@@ -124,35 +124,11 @@ function updateCategoriesList() {
     const div = document.createElement('div');
     div.className = 'category-item';
     div.dataset.index = index;
-    div.setAttribute('tabindex', '0'); // Make focusable for TV remotes
     if ((currentSection === 'category' && item === currentCategory) ||
         (currentSection === 'language' && item === currentLanguage)) {
       div.classList.add('selected');
     }
     div.textContent = item;
-    
-    // Add click event
-    div.addEventListener('click', () => {
-      if (currentSection === 'category') {
-        currentCategory = item;
-      } else if (currentSection === 'language') {
-        currentLanguage = item;
-      }
-      updateChannelList();
-    });
-    
-    // Add keyboard event for Enter key
-    div.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.keyCode === 13) {
-        if (currentSection === 'category') {
-          currentCategory = item;
-        } else if (currentSection === 'language') {
-          currentLanguage = item;
-        }
-        updateChannelList();
-      }
-    });
-    
     categoriesList.appendChild(div);
   });
 }
@@ -189,7 +165,6 @@ function createChannelElement(channel, index) {
   element.className = 'channel-item';
   element.dataset.index = index;
   element.dataset.channelNo = channel.channelNo;
-  element.setAttribute('tabindex', '0'); // Make focusable for TV remotes
   if (index === currentChannelIndex) element.classList.add('selected');
   
   element.innerHTML = `
@@ -198,18 +173,6 @@ function createChannelElement(channel, index) {
       <h3>${channel.channelNo ? `${channel.channelNo} - ` : ''}${channel.title}</h3>
     </div>
   `;
-  
-  // Add click event
-   element.addEventListener('click', () => {
-    loadChannel(index);
-  });
-  
-  // Add keyboard event for Enter key
-  element.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.keyCode === 13) {
-      loadChannel(index);
-    }
-  });
   
   return element;
 }
@@ -338,29 +301,15 @@ function navigateToPlayer() {
 }
 
 function handleNavigation(event) {
-  // Log key events for debugging
-  console.log('Key event:', event.key, event.keyCode);
-  
   // Reset auto-hide timer on any navigation
   if (isPlayerPage && listsVisible) {
     resetAutoHideTimer();
   }
 
   // Handle number keys (0-9)
-  if ((event.key >= '0' && event.key <= '9') || 
-      (event.keyCode >= 48 && event.keyCode <= 57) || 
-      (event.keyCode >= 96 && event.keyCode <= 105)) {
-    
-    // Convert keyCode to number string if needed
-    let numberKey = event.key;
-    if (event.keyCode >= 48 && event.keyCode <= 57) {
-      numberKey = String(event.keyCode - 48);
-    } else if (event.keyCode >= 96 && event.keyCode <= 105) {
-      numberKey = String(event.keyCode - 96);
-    }
-    
+  if (event.key >= '0' && event.key <= '9' && isPlayerPage) {
     // Pass the complete channels array, not the filtered one
-    handleNumberInput(numberKey, channels, (channelIndex) => {
+    handleNumberInput(event.key, channels, (channelIndex) => {
       // Find the channel in the complete list
       const selectedChannel = channels[channelIndex];
       
@@ -390,34 +339,23 @@ function handleNavigation(event) {
     return;
   }
 
-  // Map common TV remote keys to standard keys
-  let key = event.key;
-  
-  // WebOS, Tizen, etc. might use different key codes
-  if (event.keyCode === 13) key = 'Enter';
-  if (event.keyCode === 37) key = 'ArrowLeft';
-  if (event.keyCode === 38) key = 'ArrowUp';
-  if (event.keyCode === 39) key = 'ArrowRight';
-  if (event.keyCode === 40) key = 'ArrowDown';
-  if (event.keyCode === 8 || event.keyCode === 27 || event.keyCode === 461) key = 'Back';
-
   if (isPlayerPage && !listsVisible) {
-    if (key === 'ArrowRight') {
+    if (event.key === 'ArrowRight') {
       toggleListsVisibility(true);
       return;
     }
-    if (key === 'ArrowUp') {
+    if (event.key === 'ArrowUp') {
       changeChannel(-1);
       return;
     }
-    if (key === 'ArrowDown') {
+    if (event.key === 'ArrowDown') {
       changeChannel(1);
       return;
     }
     return;
   }
 
-  switch(key) {
+  switch(event.key) {
     case 'ArrowLeft':
       if (activeColumn === 0 && isPlayerPage) {
         listsVisible = false;
@@ -498,16 +436,6 @@ function handleNavigation(event) {
         loadChannel(currentChannelIndex);
       }
       break;
-      
-    case 'Back':
-    case 'Escape':
-      if (isPlayerPage) {
-        listsVisible = false;
-        toggleListsVisibility(false);
-      } else {
-        navigateToPage('index.html');
-      }
-      break;
   }
 }
 
@@ -539,98 +467,6 @@ function ensureChannelVisible(index) {
   }
 }
 
-// Setup gamepad support for TV remotes
-function setupGamepadSupport() {
-  let gamepadState = {};
-  
-  function checkGamepads() {
-    const gamepads = navigator.getGamepads();
-    
-    for (let i = 0; i < gamepads.length; i++) {
-      const gamepad = gamepads[i];
-      if (!gamepad) continue;
-      
-      // Initialize state for this gamepad if needed
-      if (!gamepadState[gamepad.index]) {
-        gamepadState[gamepad.index] = {
-          buttons: Array(gamepad.buttons.length).fill(false),
-          axes: Array(gamepad.axes.length).fill(0)
-        };
-      }
-      
-      // Check buttons
-      for (let j = 0; j < gamepad.buttons.length; j++) {
-        const buttonPressed = gamepad.buttons[j].pressed;
-        
-        // Button was just pressed (not held down)
-        if (buttonPressed && !gamepadState[gamepad.index].buttons[j]) {
-          handleGamepadButton(j);
-        }
-        
-        // Update state
-        gamepadState[gamepad.index].buttons[j] = buttonPressed;
-      }
-      
-      // Check axes (D-pad is often on axes)
-      for (let j = 0; j < gamepad.axes.length; j++) {
-        const axisValue = gamepad.axes[j];
-        const prevValue = gamepadState[gamepad.index].axes[j];
-        
-        // Detect significant change in axis value
-        if (Math.abs(axisValue - prevValue) > 0.5) {
-          handleGamepadAxis(j, axisValue);
-        }
-        
-        // Update state
-        gamepadState[gamepad.index].axes[j] = axisValue;
-      }
-    }
-    
-    requestAnimationFrame(checkGamepads);
-  }
-  
-  function handleGamepadButton(buttonIndex) {
-    console.log('Gamepad button pressed:', buttonIndex);
-    
-    // Map common gamepad buttons to keys
-    switch (buttonIndex) {
-      case 0: // A button (typically primary/select)
-        handleNavigation({ key: 'Enter', keyCode: 13 });
-        break;
-      case 1: // B button (typically back/cancel)
-        handleNavigation({ key: 'Back', keyCode: 27 });
-        break;
-      case 12: // D-pad up
-        handleNavigation({ key: 'ArrowUp', keyCode: 38 });
-        break;
-      case 13: // D-pad down
-        handleNavigation({ key: 'ArrowDown', keyCode: 40 });
-        break;
-      case 14: // D-pad left
-        handleNavigation({ key: 'ArrowLeft', keyCode: 37 });
-        break;
-      case 15: // D-pad right
-        handleNavigation({ key: 'ArrowRight', keyCode: 39 });
-        break;
-    }
-  }
-  
-  function handleGamepadAxis(axisIndex, value) {
-    console.log('Gamepad axis changed:', axisIndex, value);
-    
-    // First two axes are typically left stick
-    if (axisIndex === 0 && value < -0.7) handleNavigation({ key: 'ArrowLeft', keyCode: 37 });
-    if (axisIndex === 0 && value > 0.7) handleNavigation({ key: 'ArrowRight', keyCode: 39 });
-    if (axisIndex === 1 && value < -0.7) handleNavigation({ key: 'ArrowUp', keyCode: 38 });
-    if (axisIndex === 1 && value > 0.7) handleNavigation({ key: 'ArrowDown', keyCode: 40 });
-  }
-  
-  window.addEventListener('gamepadconnected', (e) => {
-    console.log('Gamepad connected:', e.gamepad.id);
-    checkGamepads();
-  });
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
   isPlayerPage = document.getElementById('videoPlayer') !== null;
   
@@ -642,9 +478,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateActiveColumn();
     
     playSelectedChannel();
-    
-    // Setup gamepad support
-    setupGamepadSupport();
   }
 });
 
