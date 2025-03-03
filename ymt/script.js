@@ -55,6 +55,9 @@ let isInDropdown = false;
 let languageIndex = 0;
 let selectedLanguage = '';
 let gridColumns = 4; // Default value, will be calculated based on screen size
+let lastKeyTime = 0;
+let lastKey = '';
+let keyRepeatDelay = 300; // Delay in ms to prevent multiple key presses
 
 // Detect if we're on a Smart TV
 const isSmartTV = () => {
@@ -66,9 +69,14 @@ const isSmartTV = () => {
     userAgent.includes('hbbtv') || 
     userAgent.includes('netcast') || 
     userAgent.includes('viera') || 
-    userAgent.includes('webos')
+    userAgent.includes('webos') ||
+    userAgent.includes('tizen')
   );
 };
+
+// Log if we're on a Smart TV
+console.log(`Is Smart TV: ${isSmartTV()}`);
+console.log(`User Agent: ${navigator.userAgent}`);
 
 function getLanguageGridDimensions() {
   const languages = new Set(channels.map(channel => channel.language));
@@ -144,20 +152,32 @@ function updateChannelGrid() {
   const aatralCard = document.createElement('div');
   aatralCard.className = 'channel-card';
   aatralCard.dataset.index = '0';
+  aatralCard.setAttribute('tabindex', '0'); // Make focusable for TV remotes
   aatralCard.innerHTML = `
-    <a href="aatral-tv/aatral-tv.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
-      <div class="channel-logo-container">
-        <img src="aatral-tv/data/aatral.png" alt="Aatral TV" class="channel-logo">
+    <div class="channel-logo-container">
+      <img src="aatral-tv/data/aatral.png" alt="Aatral TV" class="channel-logo">
+    </div>
+    <div class="channel-info">
+      <h3>Aatral TV</h3>
+      <div class="channel-meta">
+        <span class="channel-category">Entrt.</span>
+        <span class="channel-language">Tamil</span>
       </div>
-      <div class="channel-info">
-        <h3>Aatral TV</h3>
-        <div class="channel-meta">
-          <span class="channel-category">Entrt.</span>
-          <span class="channel-language">Tamil</span>
-        </div>
-      </div>
-    </a>
+    </div>
   `;
+  
+  // Add click event for Aatral TV
+  aatralCard.addEventListener('click', () => {
+    window.location.href = 'aatral-tv/aatral-tv.html';
+  });
+  
+  // Add keyboard event for Aatral TV
+  aatralCard.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      window.location.href = 'aatral-tv/aatral-tv.html';
+    }
+  });
+  
   channelList.appendChild(aatralCard);
   
   // Add the rest of the channels
@@ -179,8 +199,9 @@ function createChannelCard(channel, index) {
   card.className = 'channel-card';
   card.dataset.channelNo = channel.channelNo;
   card.dataset.index = index.toString();
+  card.setAttribute('tabindex', '0'); // Make focusable for TV remotes
   
-  const content = `
+  card.innerHTML = `
     <div class="channel-logo-container">
       ${channel.logo 
         ? `<img src="${channel.logo}" alt="${channel.title}" class="channel-logo">`
@@ -194,8 +215,19 @@ function createChannelCard(channel, index) {
         <span class="channel-language">${channel.language}</span>
       </div>
     </div>`;
-    
-  card.innerHTML = content;
+  
+  // Add click event
+  card.addEventListener('click', () => {
+    navigateToChannel(index - 1); // Adjust for Aatral TV card
+  });
+  
+  // Add keyboard event
+  card.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      navigateToChannel(index - 1); // Adjust for Aatral TV card
+    }
+  });
+  
   return card;
 }
 
@@ -203,6 +235,13 @@ function updateSelectedCard() {
   document.querySelectorAll('.channel-card').forEach((card) => {
     const cardIndex = parseInt(card.dataset.index || '0');
     card.classList.toggle('selected', !isInNav && !isInDropdown && cardIndex === selectedIndex);
+    
+    // For Smart TVs, also update focus
+    if (!isInNav && !isInDropdown && cardIndex === selectedIndex) {
+      setTimeout(() => {
+        card.focus();
+      }, 50);
+    }
   });
 }
 
@@ -212,6 +251,13 @@ function updateSelectedNavItem() {
     if (index === 1) { // Filter nav item
       item.classList.toggle('open', isInDropdown);
     }
+    
+    // For Smart TVs, also update focus
+    if (isInNav && index === navIndex) {
+      setTimeout(() => {
+        item.focus();
+      }, 50);
+    }
   });
 }
 
@@ -219,11 +265,18 @@ function updateSelectedLanguage() {
   const languageItems = document.querySelectorAll('.language-item');
   languageItems.forEach((item, index) => {
     item.classList.toggle('selected', isInDropdown && index === languageIndex);
+    
+    // For Smart TVs, also update focus
+    if (isInDropdown && index === languageIndex) {
+      setTimeout(() => {
+        item.focus();
+      }, 50);
+    }
   });
 }
 
 function navigateToChannel(channelIndex) {
-  const selectedChannel = channels[channelIndex];
+  const selectedChannel = filteredChannels[channelIndex];
   if (selectedChannel && selectedChannel.channelNo) {
     localStorage.setItem('selectedChannelNo', selectedChannel.channelNo.toString());
     localStorage.setItem('selectedChannelUrl', selectedChannel.url);
@@ -232,6 +285,14 @@ function navigateToChannel(channelIndex) {
 }
 
 function handleNavigation(event) {
+  // Prevent key repeat (important for TV remotes)
+  const now = Date.now();
+  if (lastKey === event.key && now - lastKeyTime < keyRepeatDelay) {
+    return;
+  }
+  lastKey = event.key;
+  lastKeyTime = now;
+  
   // Handle number input (0-9)
   if (event.key >= '0' && event.key <= '9') {
     handleNumberInput(event.key, channels, (channelIndex) => {
@@ -268,6 +329,7 @@ function handleNavigation(event) {
         }
         break;
       case 'Escape':
+      case 'Back':
         isInDropdown = false;
         updateSelectedNavItem();
         break;
@@ -360,6 +422,12 @@ function handleNavigation(event) {
           }
         }
         break;
+      case 'Escape':
+      case 'Back':
+        isInNav = true;
+        updateSelectedNavItem();
+        updateSelectedCard();
+        break;
     }
   }
 
@@ -410,8 +478,10 @@ async function initializeChannelList() {
   if (isSmartTV()) {
     console.log('Smart TV detected, adding special remote control handling');
     
-    // Some Smart TVs use different events for remote control
+    // Add special handling for TV remote control events
     document.addEventListener('keypress', (e) => {
+      console.log('Keypress event:', e.key, e.keyCode);
+      
       // Map common Smart TV remote control keys to standard keys
       let key = e.key;
       
@@ -421,11 +491,51 @@ async function initializeChannelList() {
       if (e.keyCode === 38) key = 'ArrowUp';
       if (e.keyCode === 39) key = 'ArrowRight';
       if (e.keyCode === 40) key = 'ArrowDown';
+      if (e.keyCode === 8 || e.keyCode === 27 || e.keyCode === 461) key = 'Back';
       
       if (key !== e.key) {
         handleNavigation({ key });
       }
     });
+    
+    // Add direct click handlers for all interactive elements
+    setTimeout(() => {
+      document.querySelectorAll('.nav-item').forEach((item, index) => {
+        item.addEventListener('click', () => {
+          navIndex = index;
+          isInNav = true;
+          isInDropdown = false;
+          updateSelectedNavItem();
+          
+          if (index === 1) { // Filter nav item
+            isInDropdown = true;
+            updateSelectedLanguage();
+          } else {
+            const action = item.querySelector('span:last-child').textContent.toLowerCase();
+            switch(action) {
+              case 'home':
+                window.location.href = 'index.html';
+                break;
+              case 'about':
+                window.location.href = 'about.html';
+                break;
+              case 'settings':
+                window.location.href = 'settings.html';
+                break;
+            }
+          }
+        });
+      });
+      
+      document.querySelectorAll('.language-item').forEach((item, index) => {
+        item.addEventListener('click', () => {
+          selectedLanguage = item.dataset.language;
+          filterChannels();
+          isInDropdown = false;
+          updateSelectedNavItem();
+        });
+      });
+    }, 1000);
   }
 }
 

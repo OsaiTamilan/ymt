@@ -245,6 +245,17 @@ main {
   box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
 }
 
+/* Add focus styles for TV remote navigation */
+.channel-card:focus,
+.nav-item:focus,
+.language-item:focus {
+  outline: 3px solid rgba(0, 255, 0, 0.8);
+  background: rgba(0, 255, 0, 0.15);
+  border: 2px solid rgba(0, 255, 0, 0.5);
+  transform: scale(1.05);
+  z-index: 10;
+}
+
 .channel-logo-container {
   width: 100%;
   height: 120px;
