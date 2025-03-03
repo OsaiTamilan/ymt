@@ -1,4 +1,5 @@
 import { handleNumberInput } from './channelInput.js';
+import { isSmartTV, logDeviceInfo } from './js/tvDetection.js';
 
 let currentChannelIndex = 0;
 let channels = [];
@@ -72,7 +73,7 @@ function resetAutoHideTimer() {
       listsVisible = false;
       toggleListsVisibility(false);
     }
-  }, 4000); // 5 seconds
+  }, 4000); // 4 seconds
 }
 
 function toggleListsVisibility(show) {
@@ -124,11 +125,38 @@ function updateCategoriesList() {
     const div = document.createElement('div');
     div.className = 'category-item';
     div.dataset.index = index;
+    div.setAttribute('tabindex', '0');
+    div.setAttribute('role', 'button');
+    
     if ((currentSection === 'category' && item === currentCategory) ||
         (currentSection === 'language' && item === currentLanguage)) {
       div.classList.add('selected');
     }
+    
     div.textContent = item;
+    
+    // Add keyboard event listener for Enter key
+    div.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.keyCode === 13) {
+        if (currentSection === 'category') {
+          currentCategory = item;
+        } else if (currentSection === 'language') {
+          currentLanguage = item;
+        }
+        updateChannelList();
+      }
+    });
+    
+    // Add click event listener
+    div.addEventListener('click', () => {
+      if (currentSection === 'category') {
+        currentCategory = item;
+      } else if (currentSection === 'language') {
+        currentLanguage = item;
+      }
+      updateChannelList();
+    });
+    
     categoriesList.appendChild(div);
   });
 }
@@ -165,6 +193,9 @@ function createChannelElement(channel, index) {
   element.className = 'channel-item';
   element.dataset.index = index;
   element.dataset.channelNo = channel.channelNo;
+  element.setAttribute('tabindex', '0');
+  element.setAttribute('role', 'button');
+  
   if (index === currentChannelIndex) element.classList.add('selected');
   
   element.innerHTML = `
@@ -173,6 +204,20 @@ function createChannelElement(channel, index) {
       <h3>${channel.channelNo ? `${channel.channelNo} - ` : ''}${channel.title}</h3>
     </div>
   `;
+  
+  // Add keyboard event listener for Enter key
+  element.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      currentChannelIndex = index;
+      loadChannel(currentChannelIndex);
+    }
+  });
+  
+  // Add click event listener
+  element.addEventListener('click', () => {
+    currentChannelIndex = index;
+    loadChannel(currentChannelIndex);
+  });
   
   return element;
 }
@@ -420,7 +465,7 @@ function handleNavigation(event) {
         const selectedNav = navItems[currentNavIndex];
         const section = selectedNav.querySelector('span:last-child').textContent.toLowerCase();
         
-        if (section === 'home') {
+        if ( section === 'home') {
           navigateToPage('index.html');
         } else if (section === 'about') {
           navigateToPage('about.html');
@@ -470,14 +515,68 @@ function ensureChannelVisible(index) {
 document.addEventListener('DOMContentLoaded', async () => {
   isPlayerPage = document.getElementById('videoPlayer') !== null;
   
-  channels = await loadChannels();
+  // Log device info
+  logDeviceInfo();
   
   if (isPlayerPage) {
+    channels = await loadChannels();
+    
+    // Add tabindex and role attributes to nav items
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.setAttribute('tabindex', '0');
+      item.setAttribute('role', 'button');
+      
+      // Add keyboard event listener for Enter key
+      item.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+          const section = item.querySelector('span:last-child').textContent.toLowerCase();
+          if (section === 'home') {
+            navigateToPage('index.html');
+          } else if (section === 'about') {
+            navigateToPage('about.html');
+          } else if (section === 'settings') {
+            navigateToPage('settings.html');
+          } else if (section === 'language' || section === 'category') {
+            currentSection = section;
+            currentCategory = '';
+            currentLanguage = '';
+            updateCategoriesList();
+            updateChannelList();
+          }
+        }
+      });
+    });
+    
     updateCategoriesList();
     updateChannelList();
     updateActiveColumn();
     
     playSelectedChannel();
+    
+    // Special handling for TV remote controls
+    if (isSmartTV()) {
+      console.log('Smart TV detected, adding special remote control handling');
+      
+      // Add special handling for TV remote control events
+      document.addEventListener('keypress', (e) => {
+        console.log('Keypress event:', e.key, e.keyCode);
+        
+        // Map common Smart TV remote control keys to standard keys
+        let key = e.key;
+        
+        // WebOS, Tizen, etc. might use different key codes
+        if (e.keyCode === 13 || e.keyCode === 32) key = 'Enter';
+        if (e.keyCode === 37) key = 'ArrowLeft';
+        if (e.keyCode === 38) key = 'ArrowUp';
+        if (e.keyCode === 39) key = 'ArrowRight';
+        if (e.keyCode === 40) key = 'ArrowDown';
+        if (e.keyCode === 8 || e.keyCode === 27 || e.keyCode === 461) key = 'Back';
+        
+        if (key !== e.key) {
+          handleNavigation({ key });
+        }
+      });
+    }
   }
 });
 

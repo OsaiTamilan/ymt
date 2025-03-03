@@ -1,51 +1,11 @@
-import { handleNumberInput, showNumberInput, hideNumberInput } from './channelInput.js';
+import { handleNumberInput } from './channelInput.js';
+import { fetchPlaylist } from './js/m3uParser.js';
+import { UIManager } from './js/uiManager.js';
+import { ChannelGrid } from './js/channelGrid.js';
+import { LanguageFilter } from './js/languageFilter.js';
+import { logDeviceInfo } from './js/tvDetection.js';
 
-async function fetchPlaylist() {
-  try {
-    const response = await fetch('data/channels.m3u');
-    const data = await response.text();
-    return parseM3U(data);
-  } catch (error) {
-    console.error('Error loading playlist:', error);
-    return [];
-  }
-}
-
-function parseM3U(content) {
-  const lines = content.split('\n');
-  const channels = [];
-  let currentChannel = null;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    
-    if (line.startsWith('#EXTINF:')) {
-      const logoMatch = line.match(/tvg-logo="([^"]+)"/);
-      const titleMatch = line.match(/,(.+)$/);
-      const categoryMatch = line.match(/Category="([^"]*)"/);
-      const languageMatch = line.match(/Language="([^"]*)"/);
-      const channelNoMatch = line.match(/c-no="([^"]*)"/);
-      
-      if (titleMatch) {
-        currentChannel = {
-          title: titleMatch[1].trim(),
-          logo: logoMatch ? logoMatch[1] : '',
-          category: categoryMatch ? categoryMatch[1] : 'Uncategorized',
-          language: languageMatch ? languageMatch[1] : 'Unknown',
-          channelNo: channelNoMatch ? parseInt(channelNoMatch[1]) : null,
-          url: ''
-        };
-      }
-    } else if (line && !line.startsWith('#') && currentChannel) {
-      currentChannel.url = line;
-      channels.push(currentChannel);
-      currentChannel = null;
-    }
-  }
-
-  return channels;
-}
-
+// State variables
 let selectedIndex = 0;
 let channels = [];
 let filteredChannels = [];
@@ -54,300 +14,16 @@ let isInNav = true;
 let isInDropdown = false;
 let languageIndex = 0;
 let selectedLanguage = '';
-let gridColumns = 4; // Default value, will be calculated based on screen size
-let lastKeyTime = 0;
-let lastKey = '';
-let keyRepeatDelay = 300; // Delay in ms to prevent multiple key presses
 
-// Detect if we're on a Smart TV
-const isSmartTV = () => {
-  const userAgent = navigator.userAgent.toLowerCase();
-  return (
-    userAgent.includes('smart-tv') || 
-    userAgent.includes('tv') || 
-    userAgent.includes('android tv') || 
-    userAgent.includes('hbbtv') || 
-    userAgent.includes('netcast') || 
-    userAgent.includes('viera') || 
-    userAgent.includes('webos') ||
-    userAgent.includes('tizen')
-  );
-};
+// Initialize managers
+const uiManager = new UIManager();
+const channelGrid = new ChannelGrid(uiManager);
+let languageFilter;
 
-// Log if we're on a Smart TV
-console.log(`Is Smart TV: ${isSmartTV()}`);
-console.log(`User Agent: ${navigator.userAgent}`);
-
-function getLanguageGridDimensions() {
-  const languages = new Set(channels.map(channel => channel.language));
-  const totalItems = languages.size + 1; // +1 for "All Languages"
-  const columns = Math.min(4, totalItems);
-  const rows = Math.ceil(totalItems / columns);
-  return { columns, rows, totalItems };
-}
-
-function updateLanguageList() {
-  const languages = new Set(channels.map(channel => channel.language));
-  const languageList = document.querySelector('.language-list');
-  if (!languageList) return;
-
-  const sortedLanguages = Array.from(languages).sort();
-  
-  languageList.innerHTML = '';
-  
-  // Add "All Languages" option
-  const allLangItem = document.createElement('div');
-  allLangItem.className = `language-item ${!selectedLanguage ? 'selected' : ''}`;
-  allLangItem.dataset.language = '';
-  allLangItem.setAttribute('tabindex', '0');
-  allLangItem.setAttribute('role', 'button');
-  allLangItem.innerHTML = `
-    <span>All Languages</span>
-    <span class="material-icons">check</span>
-    <div class="tv-focus-indicator"></div>
-  `;
-  
-  // Add event listeners for "All Languages"
-  allLangItem.addEventListener('click', () => {
-    selectedLanguage = '';
-    filterChannels();
-    isInDropdown = false;
-    updateSelectedNavItem();
-    updateLanguageList();
-  });
-  
-  allLangItem.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.keyCode === 13) {
-      selectedLanguage = '';
-      filterChannels();
-      isInDropdown = false;
-      updateSelectedNavItem();
-      updateLanguageList();
-    }
-  });
-  
-  languageList.appendChild(allLangItem);
-  
-  // Add each language option
-  sortedLanguages.forEach((lang, idx) => {
-    const langItem = document.createElement('div');
-    langItem.className = `language-item ${selectedLanguage === lang ? 'selected' : ''}`;
-    langItem.dataset.language = lang;
-    langItem.dataset.index = (idx + 1).toString();
-    langItem.setAttribute('tabindex', '0');
-    langItem.setAttribute('role', 'button');
-    langItem.innerHTML = `
-      <span>${lang}</span>
-      <span class="material-icons">check</span>
-      <div class="tv-focus-indicator"></div>
-    `;
-    
-    // Add event listeners for this language
-    langItem.addEventListener('click', () => {
-      selectedLanguage = lang;
-      filterChannels();
-      isInDropdown = false;
-      updateSelectedNavItem();
-      updateLanguageList();
-    });
-    
-    langItem.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.keyCode === 13) {
-        selectedLanguage = lang;
-        filterChannels();
-        isInDropdown = false;
-        updateSelectedNavItem();
-        updateLanguageList();
-      }
-    });
-    
-    languageList.appendChild(langItem);
-  });
-
-  if (isInDropdown) {
-    languageIndex = selectedLanguage ? 
-      sortedLanguages.indexOf(selectedLanguage) + 1 : 0;
-    updateSelectedLanguage();
-  }
-}
-
-function filterChannels() {
-  if (!selectedLanguage) {
-    filteredChannels = channels;
-  } else {
-    filteredChannels = channels.filter(channel => channel.language === selectedLanguage);
-  }
-  updateChannelGrid();
-}
-
-function calculateGridColumns() {
-  const container = document.querySelector('.channels-container');
-  if (!container) return 4;
-  
-  const containerWidth = container.clientWidth;
-  
-  // For Smart TVs, use a simpler grid with fewer columns
-  if (isSmartTV()) {
-    if (containerWidth < 1280) return 3;
-    if (containerWidth < 1920) return 4;
-    return 5;
-  }
-  
-  // For regular browsers
-  if (containerWidth < 768) return 2;
-  if (containerWidth < 1024) return 3;
-  if (containerWidth < 1440) return 4;
-  if (containerWidth < 1920) return 5;
-  return 6;
-}
-
-function updateChannelGrid() {
-  const channelList = document.getElementById('channelList');
-  if (!channelList) return;
-
-  channelList.innerHTML = '';
-  
-  // Add Aatral TV card first
-  const aatralCard = document.createElement('div');
-  aatralCard.className = 'channel-card';
-  aatralCard.dataset.index = '0';
-  aatralCard.setAttribute('tabindex', '0'); // Make focusable for TV remotes
-  aatralCard.setAttribute('role', 'button');
-  aatralCard.innerHTML = `
-    <div class="channel-logo-container">
-      <img src="aatral-tv/data/aatral.png" alt="Aatral TV" class="channel-logo">
-    </div>
-    <div class="channel-info">
-      <h3>Aatral TV</h3>
-      <div class="channel-meta">
-        <span class="channel-category">Entrt.</span>
-        <span class="channel-language">Tamil</span>
-      </div>
-    </div>
-    <div class="tv-focus-indicator"></div>
-  `;
-  
-  // Add click event for Aatral TV
-  aatralCard.addEventListener('click', () => {
-    window.location.href = 'aatral-tv/aatral-tv.html';
-  });
-  
-  // Add keyboard event for Aatral TV
-  aatralCard.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.keyCode === 13) {
-      window.location.href = 'aatral-tv/aatral-tv.html';
-    }
-  });
-  
-  channelList.appendChild(aatralCard);
-  
-  // Add the rest of the channels
-  filteredChannels.forEach((channel, index) => {
-    const card = createChannelCard(channel, index + 1); // +1 because Aatral TV is index 0
-    channelList.appendChild(card);
-  });
-  
-  // Calculate grid columns based on container width
-  gridColumns = calculateGridColumns();
-  console.log(`Grid columns: ${gridColumns}`);
-  
-  selectedIndex = 0;
-  updateSelectedCard();
-}
-
-function createChannelCard(channel, index) {
-  const card = document.createElement('div');
-  card.className = 'channel-card';
-  card.dataset.channelNo = channel.channelNo;
-  card.dataset.index = index.toString();
-  card.setAttribute('tabindex', '0'); // Make focusable for TV remotes
-  card.setAttribute('role', 'button');
-  
-  card.innerHTML = `
-    <div class="channel-logo-container">
-      ${channel.logo 
-        ? `<img src="${channel.logo}" alt="${channel.title}" class="channel-logo">`
-        : `<div class="channel-logo-placeholder">${channel.title[0]}</div>`
-      }
-    </div>
-    <div class="channel-info">
-      <h3>${channel.channelNo ? `${channel.channelNo} - ` : ''}${channel.title}</h3>
-      <div class="channel-meta">
-        <span class="channel-category">${channel.category}</span>
-        <span class="channel-language">${channel.language}</span>
-      </div>
-    </div>
-    <div class="tv-focus-indicator"></div>`;
-  
-  // Add click event
-  card.addEventListener('click', () => {
-    navigateToChannel(index - 1); // Adjust for Aatral TV card
-  });
-  
-  // Add keyboard event
-  card.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.keyCode === 13) {
-      navigateToChannel(index - 1); // Adjust for Aatral TV card
-    }
-  });
-  
-  return card;
-}
-
-function updateSelectedCard() {
-  document.querySelectorAll('.channel-card').forEach((card) => {
-    const cardIndex = parseInt(card.dataset.index || '0');
-    const isSelected = !isInNav && !isInDropdown && cardIndex === selectedIndex;
-    
-    card.classList.toggle('selected', isSelected);
-    card.classList.toggle('tv-focused', isSelected);
-    
-    // For Smart TVs, also update focus
-    if (isSelected) {
-      setTimeout(() => {
-        card.focus();
-      }, 50);
-    }
-  });
-}
-
-function updateSelectedNavItem() {
-  document.querySelectorAll('.nav-item').forEach((item, index) => {
-    const isSelected = isInNav && index === navIndex;
-    
-    item.classList.toggle('selected', isSelected);
-    item.classList.toggle('tv-focused', isSelected);
-    
-    if (index === 1) { // Filter nav item
-      item.classList.toggle('open', isInDropdown);
-    }
-    
-    // For Smart TVs, also update focus
-    if (isSelected) {
-      setTimeout(() => {
-        item.focus();
-      }, 50);
-    }
-  });
-}
-
-function updateSelectedLanguage() {
-  const languageItems = document.querySelectorAll('.language-item');
-  languageItems.forEach((item, index) => {
-    const isSelected = isInDropdown && index === languageIndex;
-    
-    item.classList.toggle('selected', isSelected);
-    item.classList.toggle('tv-focused', isSelected);
-    
-    // For Smart TVs, also update focus
-    if (isSelected) {
-      setTimeout(() => {
-        item.focus();
-      }, 50);
-    }
-  });
-}
-
+/**
+ * Navigate to a specific channel
+ * @param {number} channelIndex - Index of the channel to navigate to
+ */
 function navigateToChannel(channelIndex) {
   const selectedChannel = filteredChannels[channelIndex];
   if (selectedChannel && selectedChannel.channelNo) {
@@ -357,14 +33,59 @@ function navigateToChannel(channelIndex) {
   }
 }
 
+/**
+ * Apply language filter and update UI
+ * @param {string} language - Language to filter by
+ */
+function applyLanguageFilter(language) {
+  selectedLanguage = language;
+  filteredChannels = languageFilter.filterChannels(channels, selectedLanguage);
+  
+  // Update UI
+  uiManager.gridColumns = channelGrid.updateChannelGrid(filteredChannels, navigateToChannel);
+  selectedIndex = 0;
+  isInDropdown = false;
+  
+  // Update language list
+  languageFilter.updateLanguageList(
+    channels, 
+    selectedLanguage, 
+    isInDropdown, 
+    languageIndex,
+    updateLanguageIndex,
+    updateNavigation
+  );
+  
+  // Update selected card
+  uiManager.updateSelectedCard(selectedIndex, isInNav, isInDropdown);
+}
+
+/**
+ * Update the language index and UI
+ * @param {number} index - New language index
+ */
+function updateLanguageIndex(index) {
+  languageIndex = index;
+  uiManager.updateSelectedLanguage(languageIndex, isInDropdown);
+}
+
+/**
+ * Update navigation state and UI
+ */
+function updateNavigation() {
+  isInDropdown = false;
+  uiManager.updateSelectedNavItem(navIndex, isInNav, isInDropdown);
+}
+
+/**
+ * Handle keyboard navigation
+ * @param {KeyboardEvent} event - Keyboard event
+ */
 function handleNavigation(event) {
   // Prevent key repeat (important for TV remotes)
-  const now = Date.now();
-  if (lastKey === event.key && now - lastKeyTime < keyRepeatDelay) {
+  if (!uiManager.shouldProcessKey(event.key)) {
     return;
   }
-  lastKey = event.key;
-  lastKeyTime = now;
   
   // Handle number input (0-9)
   if (event.key >= '0' && event.key <= '9') {
@@ -375,257 +96,239 @@ function handleNavigation(event) {
   }
 
   if (isInDropdown) {
-    const languageItems = document.querySelectorAll('.language-item');
-    const totalLanguages = languageItems.length;
-
-    switch(event.key) {
-      case 'ArrowLeft':
-        if (languageIndex > 0) {
-          languageIndex--;
-          updateSelectedLanguage();
-        }
-        break;
-      case 'ArrowRight':
-        if (languageIndex < totalLanguages - 1) {
-          languageIndex++;
-          updateSelectedLanguage();
-        }
-        break;
-      case 'ArrowUp':
-        if (languageIndex >= 4) { // Assuming 4 items per row
-          languageIndex -= 4;
-          updateSelectedLanguage();
-        } else {
-          // Exit dropdown and go back to nav
-          isInDropdown = false;
-          updateSelectedNavItem();
-        }
-        break;
-      case 'ArrowDown':
-        if (languageIndex + 4 < totalLanguages) { // Assuming 4 items per row
-          languageIndex += 4;
-          updateSelectedLanguage();
-        }
-        break;
-      case 'Enter':
-        const selectedItem = languageItems[languageIndex];
-        if (selectedItem) {
-          selectedLanguage = selectedItem.dataset.language;
-          filterChannels();
-          isInDropdown = false;
-          updateSelectedNavItem();
-          updateLanguageList();
-        }
-        break;
-      case 'Escape':
-      case 'Back':
-        isInDropdown = false;
-        updateSelectedNavItem();
-        break;
-    }
+    handleDropdownNavigation(event);
   } else if (isInNav) {
-    const navItems = document.querySelectorAll('.nav-item');
-    switch(event.key) {
-      case 'ArrowLeft':
-        if (navIndex > 0) {
-          navIndex--;
-          updateSelectedNavItem();
-        }
-        break;
-      case 'ArrowRight':
-        if (navIndex < navItems.length - 1) {
-          navIndex++;
-          updateSelectedNavItem();
-        }
-        break;
-      case 'ArrowDown':
-        isInNav = false;
-        updateSelectedNavItem();
-        updateSelectedCard();
-        break;
-      case 'Enter':
-        if (navIndex === 1) { // Filter nav item
-          isInDropdown = true;
-          languageIndex = 0; // Reset language index when opening dropdown
-          updateSelectedNavItem();
-          updateSelectedLanguage();
-        } else {
-          const action = navItems[navIndex].querySelector('span:last-child').textContent.toLowerCase();
-          switch(action) {
-            case 'home':
-              window.location.href = 'index.html';
-              break;
-            case 'about':
-              window.location.href = 'about.html';
-              break;
-            case 'settings':
-              window.location.href = 'settings.html';
-              break;
-          }
-        }
-        break;
-    }
+    handleNavBarNavigation(event);
   } else {
-    const channelCards = document.querySelectorAll('.channel-card');
-    const totalCards = channelCards.length;
-
-    switch(event.key) {
-      case 'ArrowUp':
-        if (selectedIndex === 0) {
-          isInNav = true;
-          updateSelectedNavItem();
-          updateSelectedCard();
-        } else if (selectedIndex >= gridColumns) {
-          selectedIndex = Math.max(0, selectedIndex - gridColumns);
-          updateSelectedCard();
-        }
-        break;
-      case 'ArrowDown':
-        const nextRowIndex = selectedIndex + gridColumns;
-        if (nextRowIndex < totalCards) {
-          selectedIndex = nextRowIndex;
-          updateSelectedCard();
-        }
-        break;
-      case 'ArrowLeft':
-        if (selectedIndex > 0) {
-          selectedIndex--;
-          updateSelectedCard();
-        }
-        break;
-      case 'ArrowRight':
-        if (selectedIndex < totalCards - 1) {
-          selectedIndex++;
-          updateSelectedCard();
-        }
-        break;
-      case 'Enter':
-        const selectedCard = channelCards[selectedIndex];
-        if (selectedCard) {
-          if (selectedIndex === 0) {
-            // Aatral TV card
-            window.location.href = 'aatral-tv/aatral-tv.html';
-          } else {
-            const channelIndex = selectedIndex - 1; // Adjust for Aatral TV card
-            navigateToChannel(channelIndex);
-          }
-        }
-        break;
-      case 'Escape':
-      case 'Back':
-        isInNav = true;
-        updateSelectedNavItem();
-        updateSelectedCard();
-        break;
-    }
+    handleGridNavigation(event);
   }
 
   // Ensure the selected card is visible
   const selectedCard = document.querySelector('.channel-card.selected');
-  if (selectedCard) {
-    selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  uiManager.ensureCardVisible(selectedCard);
+}
+
+/**
+ * Handle navigation within the dropdown
+ * @param {KeyboardEvent} event - Keyboard event
+ */
+function handleDropdownNavigation(event) {
+  const languageItems = document.querySelectorAll('.language-item');
+  const totalLanguages = languageItems.length;
+
+  switch(event.key) {
+    case 'ArrowLeft':
+      if (languageIndex > 0) {
+        languageIndex--;
+        uiManager.updateSelectedLanguage(languageIndex, isInDropdown);
+      }
+      break;
+    case 'ArrowRight':
+      if (languageIndex < totalLanguages - 1) {
+        languageIndex++;
+        uiManager.updateSelectedLanguage(languageIndex, isInDropdown);
+      }
+      break;
+    case 'ArrowUp':
+      if (languageIndex >= 4) { // Assuming 4 items per row
+        languageIndex -= 4;
+        uiManager.updateSelectedLanguage(languageIndex, isInDropdown);
+      } else {
+        // Exit dropdown and go back to nav
+        isInDropdown = false;
+        uiManager.updateSelectedNavItem(navIndex, isInNav, isInDropdown);
+      }
+      break;
+    case 'ArrowDown':
+      if (languageIndex + 4 < totalLanguages) { // Assuming 4 items per row
+        languageIndex += 4;
+        uiManager.updateSelectedLanguage(languageIndex, isInDropdown);
+      }
+      break;
+    case 'Enter':
+      const selectedItem = languageItems[languageIndex];
+      if (selectedItem) {
+        selectedLanguage = selectedItem.dataset.language;
+        applyLanguageFilter(selectedLanguage);
+      }
+      break;
+    case 'Escape':
+    case 'Back':
+      isInDropdown = false;
+      uiManager.updateSelectedNavItem(navIndex, isInNav, isInDropdown);
+      break;
   }
 }
 
-// Handle window resize to recalculate grid columns
+/**
+ * Handle navigation within the nav bar
+ * @param {KeyboardEvent} event - Keyboard event
+ */
+function handleNavBarNavigation(event) {
+  const navItems = document.querySelectorAll('.nav-item');
+  switch(event.key) {
+    case 'ArrowLeft':
+      if (navIndex > 0) {
+        navIndex--;
+        uiManager.updateSelectedNavItem(navIndex, isInNav, isInDropdown);
+      }
+      break;
+    case 'ArrowRight':
+      if (navIndex < navItems.length - 1) {
+        navIndex++;
+        uiManager.updateSelectedNavItem(navIndex, isInNav, isInDropdown);
+      }
+      break;
+    case 'ArrowDown':
+      isInNav = false;
+      uiManager.updateSelectedNavItem(navIndex, isInNav, isInDropdown);
+      uiManager.updateSelectedCard(selectedIndex, isInNav, isInDropdown);
+      break;
+    case 'Enter':
+      if (navIndex === 1) { // Filter nav item
+        isInDropdown = true;
+        languageIndex = 0; // Reset language index when opening dropdown
+        uiManager.updateSelectedNavItem(navIndex, isInNav, isInDropdown);
+        uiManager.updateSelectedLanguage(languageIndex, isInDropdown);
+      } else {
+        const action = navItems[navIndex].querySelector('span:last-child').textContent.toLowerCase();
+        switch(action) {
+          case 'home':
+            window.location.href = 'index.html';
+            break;
+          case 'about':
+            window.location.href = 'about.html';
+            break;
+          case 'settings':
+            window.location.href = 'settings.html';
+            break;
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * Handle navigation within the channel grid
+ * @param {KeyboardEvent} event - Keyboard event
+ */
+function handleGridNavigation(event) {
+  const channelCards = document.querySelectorAll('.channel-card');
+  const totalCards = channelCards.length;
+
+  switch(event.key) {
+    case 'ArrowUp':
+      if (selectedIndex === 0) {
+        isInNav = true;
+        uiManager.updateSelectedNavItem(navIndex, isInNav, isInDropdown);
+        uiManager.updateSelectedCard(selectedIndex, isInNav, isInDropdown);
+      } else if (selectedIndex >= uiManager.gridColumns) {
+        selectedIndex = Math.max(0, selectedIndex - uiManager.gridColumns);
+        uiManager.updateSelectedCard(selectedIndex, isInNav, isInDropdown);
+      }
+      break;
+    case 'ArrowDown':
+      const nextRowIndex = selectedIndex + uiManager.gridColumns;
+      if (nextRowIndex < totalCards) {
+        selectedIndex = nextRowIndex;
+        uiManager.updateSelectedCard(selectedIndex, isInNav, isInDropdown);
+      }
+      break;
+    case 'ArrowLeft':
+      if (selectedIndex > 0) {
+        selectedIndex--;
+        uiManager.updateSelectedCard(selectedIndex, isInNav, isInDropdown);
+      }
+      break;
+    case 'ArrowRight':
+      if (selectedIndex < totalCards - 1) {
+        selectedIndex++;
+        uiManager.updateSelectedCard(selectedIndex, isInNav, isInDropdown);
+      }
+      break;
+    case 'Enter':
+      const selectedCard = channelCards[selectedIndex];
+      if (selectedCard) {
+        if (selectedIndex === 0) {
+          // Aatral TV card
+          window.location.href = 'aatral-tv/aatral-tv.html';
+        } else {
+          const channelIndex = selectedIndex - 1; // Adjust for Aatral TV card
+          navigateToChannel(channelIndex);
+        }
+      }
+      break;
+    case 'Escape':
+    case 'Back':
+      isInNav = true;
+      uiManager.updateSelectedNavItem(navIndex, isInNav, isInDropdown);
+      uiManager.updateSelectedCard(selectedIndex, isInNav, isInDropdown);
+      break;
+  }
+}
+
+/**
+ * Handle window resize
+ */
 function handleResize() {
-  const oldColumns = gridColumns;
-  const newColumns = calculateGridColumns();
+  const oldColumns = uiManager.gridColumns;
+  const newColumns = uiManager.calculateGridColumns();
   
   if (oldColumns !== newColumns) {
-    gridColumns = newColumns;
-    console.log(`Grid columns updated: ${gridColumns}`);
+    uiManager.gridColumns = newColumns;
+    console.log(`Grid columns updated: ${uiManager.gridColumns}`);
     
     // If we're in the grid, make sure the selected index is still valid
     if (!isInNav && !isInDropdown) {
-      updateSelectedCard();
+      uiManager.updateSelectedCard(selectedIndex, isInNav, isInDropdown);
     }
   }
 }
 
+/**
+ * Initialize the channel list
+ */
 async function initializeChannelList() {
   const channelList = document.getElementById('channelList');
   if (!channelList) return;
   
-  channels = await fetchPlaylist();
-  filteredChannels = channels;
+  // Log device info
+  logDeviceInfo();
+  
+  // Fetch channels
+  channels = await fetchPlaylist('data/channels.m3u');
+  filteredChannels = [...channels];
   
   if (channels.length === 0) {
     channelList.innerHTML = '<p>No channels found</p>';
     return;
   }
 
-  updateLanguageList();
-  updateChannelGrid();
-  updateSelectedNavItem();
+  // Initialize language filter
+  languageFilter = new LanguageFilter(applyLanguageFilter);
+  
+  // Update UI
+  languageFilter.updateLanguageList(
+    channels, 
+    selectedLanguage, 
+    isInDropdown, 
+    languageIndex,
+    updateLanguageIndex,
+    updateNavigation
+  );
+  
+  uiManager.gridColumns = channelGrid.updateChannelGrid(filteredChannels, navigateToChannel);
+  uiManager.updateSelectedNavItem(navIndex, isInNav, isInDropdown);
   
   // Add event listeners
   document.addEventListener('keydown', handleNavigation);
   window.addEventListener('resize', handleResize);
   
-  // Add focus indicators to nav items
-  document.querySelectorAll('.nav-item').forEach(item => {
-    if (!item.querySelector('.tv-focus-indicator')) {
-      const indicator = document.createElement('div');
-      indicator.className = 'tv-focus-indicator';
-      item.appendChild(indicator);
-    }
-  });
+  // Add focus indicators
+  uiManager.addFocusIndicators();
   
-  // For Smart TVs, add special handling for remote control
-  if (isSmartTV()) {
-    console.log('Smart TV detected, adding special remote control handling');
-    
-    // Add special handling for TV remote control events
-    document.addEventListener('keypress', (e) => {
-      console.log('Keypress event:', e.key, e.keyCode);
-      
-      // Map common Smart TV remote control keys to standard keys
-      let key = e.key;
-      
-      // WebOS, Tizen, etc. might use different key codes
-      if (e.keyCode === 13 || e.keyCode === 32) key = 'Enter';
-      if (e.keyCode === 37) key = 'ArrowLeft';
-      if (e.keyCode === 38) key = 'ArrowUp';
-      if (e.keyCode === 39) key = 'ArrowRight';
-      if (e.keyCode === 40) key = 'ArrowDown';
-      if (e.keyCode === 8 || e.keyCode === 27 || e.keyCode === 461) key = 'Back';
-      
-      if (key !== e.key) {
-        handleNavigation({ key });
-      }
-    });
-    
-    // Add direct click handlers for all interactive elements
-    setTimeout(() => {
-      document.querySelectorAll('.nav-item').forEach((item, index) => {
-        item.addEventListener('click', () => {
-          navIndex = index;
-          isInNav = true;
-          isInDropdown = false;
-          updateSelectedNavItem();
-          
-          if (index === 1) { // Filter nav item
-            isInDropdown = true;
-            updateSelectedLanguage();
-          } else {
-            const action = item.querySelector('span:last-child').textContent.toLowerCase();
-            switch(action) {
-              case 'home':
-                window.location.href = 'index.html';
-                break;
-              case 'about':
-                window.location.href = 'about.html';
-                break;
-              case 'settings':
-                window.location.href = 'settings.html';
-                break;
-            }
-          }
-        });
-      });
-    }, 1000);
-  }
+  // Set up TV remote handling
+  uiManager.setupTVRemoteHandling(handleNavigation);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
