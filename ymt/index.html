@@ -5,7 +5,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="ad.css" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script type="module" src="script.js"></script>
   </head>
   <body>
@@ -56,6 +58,19 @@
         </div>
       </div>
       <div id="numberDisplay"></div>
+      
+      <!-- Video player overlay -->
+      <div id="videoPlayerOverlay" class="video-player-overlay">
+        <div class="video-player-container">
+          <div class="video-header">
+            <h3 id="currentChannelTitle">Channel Name</h3>
+            <button id="closeVideoBtn" class="close-video-btn">
+              <span class="material-icons">close</span>
+            </button>
+          </div>
+          <video id="videoPlayer" controls playsinline></video>
+        </div>
+      </div>
     </main>
   </body>
 </html>
