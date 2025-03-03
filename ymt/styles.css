@@ -25,9 +25,9 @@ main {
 
 .featured-banner {
   height: auto;
-  min-height: 20vh;
+  min-height: 10vh;
   background: linear-gradient(to right, #000, #1a1a1a);
-  padding: 2rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -40,7 +40,7 @@ main {
 }
 
 .featured-info {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 .featured-info p {
@@ -53,7 +53,7 @@ main {
 .main-nav-bar {
   display: flex;
   gap: 2rem;
-  padding: 1.5rem 2rem;
+  padding: 0.5rem 2rem;
   background: rgba(0, 0, 0, 0.95);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: sticky;
@@ -100,11 +100,11 @@ main {
 .dropdown-menu {
   position: absolute;
   top: 100%;
-  left: 0;
-  transform: translateY(-10px);
+  left: 300%;
+  transform: translateX(-50%) translateY(-10px);
   margin-top: 0.5rem;
   width: max-content;
-  min-width: 300px;
+  min-width: 600px;
   background: rgba(30, 30, 30, 0.95);
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -118,7 +118,7 @@ main {
 .has-dropdown.open .dropdown-menu {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 
 .dropdown-header {
@@ -150,7 +150,6 @@ main {
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid transparent;
-  margin-bottom: 0.5rem;
 }
 
 .language-item:hover {
@@ -348,24 +347,4 @@ main {
     border: 2px solid rgba(0, 255, 0, 0.5);
     outline: none;
   }
-}
-
-/* TV Remote specific styles */
-.tv-focus-indicator {
-  position: absolute;
-  top: -5px;
-  left: -5px;
-  right: -5px;
-  bottom: -5px;
-  border: 3px solid #00ff00;
-  border-radius: 10px;
-  pointer-events: none;
-  z-index: 100;
-  display: none;
-}
-
-.channel-card.tv-focused .tv-focus-indicator,
-.nav-item.tv-focused .tv-focus-indicator,
-.language-item.tv-focused .tv-focus-indicator {
-  display: block;
 }
