@@ -100,11 +100,11 @@ main {
 .dropdown-menu {
   position: absolute;
   top: 100%;
-  left: 300%;
-  transform: translateX(-50%) translateY(-10px);
+  left: 0;
+  transform: translateY(-10px);
   margin-top: 0.5rem;
   width: max-content;
-  min-width: 600px;
+  min-width: 300px;
   background: rgba(30, 30, 30, 0.95);
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -118,7 +118,7 @@ main {
 .has-dropdown.open .dropdown-menu {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
 }
 
 .dropdown-header {
@@ -150,6 +150,7 @@ main {
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid transparent;
+  margin-bottom: 0.5rem;
 }
 
 .language-item:hover {
@@ -347,4 +348,24 @@ main {
     border: 2px solid rgba(0, 255, 0, 0.5);
     outline: none;
   }
+}
+
+/* TV Remote specific styles */
+.tv-focus-indicator {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border: 3px solid #00ff00;
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 100;
+  display: none;
+}
+
+.channel-card.tv-focused .tv-focus-indicator,
+.nav-item.tv-focused .tv-focus-indicator,
+.language-item.tv-focused .tv-focus-indicator {
+  display: block;
 }

@@ -93,22 +93,81 @@ function updateLanguageList() {
 
   const sortedLanguages = Array.from(languages).sort();
   
-  languageList.innerHTML = `
-    <div class="language-item ${!selectedLanguage ? 'selected' : ''}" data-language="">
-      <span>All Languages</span>
-      <span class="material-icons">check</span>
-    </div>
-    ${sortedLanguages.map(lang => `
-      <div class="language-item ${selectedLanguage === lang ? 'selected' : ''}" data-language="${lang}">
-        <span>${lang}</span>
-        <span class="material-icons">check</span>
-      </div>
-    `).join('')}
+  languageList.innerHTML = '';
+  
+  // Add "All Languages" option
+  const allLangItem = document.createElement('div');
+  allLangItem.className = `language-item ${!selectedLanguage ? 'selected' : ''}`;
+  allLangItem.dataset.language = '';
+  allLangItem.setAttribute('tabindex', '0');
+  allLangItem.setAttribute('role', 'button');
+  allLangItem.innerHTML = `
+    <span>All Languages</span>
+    <span class="material-icons">check</span>
+    <div class="tv-focus-indicator"></div>
   `;
+  
+  // Add event listeners for "All Languages"
+  allLangItem.addEventListener('click', () => {
+    selectedLanguage = '';
+    filterChannels();
+    isInDropdown = false;
+    updateSelectedNavItem();
+    updateLanguageList();
+  });
+  
+  allLangItem.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      selectedLanguage = '';
+      filterChannels();
+      isInDropdown = false;
+      updateSelectedNavItem();
+      updateLanguageList();
+    }
+  });
+  
+  languageList.appendChild(allLangItem);
+  
+  // Add each language option
+  sortedLanguages.forEach((lang, idx) => {
+    const langItem = document.createElement('div');
+    langItem.className = `language-item ${selectedLanguage === lang ? 'selected' : ''}`;
+    langItem.dataset.language = lang;
+    langItem.dataset.index = (idx + 1).toString();
+    langItem.setAttribute('tabindex', '0');
+    langItem.setAttribute('role', 'button');
+    langItem.innerHTML = `
+      <span>${lang}</span>
+      <span class="material-icons">check</span>
+      <div class="tv-focus-indicator"></div>
+    `;
+    
+    // Add event listeners for this language
+    langItem.addEventListener('click', () => {
+      selectedLanguage = lang;
+      filterChannels();
+      isInDropdown = false;
+      updateSelectedNavItem();
+      updateLanguageList();
+    });
+    
+    langItem.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.keyCode === 13) {
+        selectedLanguage = lang;
+        filterChannels();
+        isInDropdown = false;
+        updateSelectedNavItem();
+        updateLanguageList();
+      }
+    });
+    
+    languageList.appendChild(langItem);
+  });
 
   if (isInDropdown) {
     languageIndex = selectedLanguage ? 
       sortedLanguages.indexOf(selectedLanguage) + 1 : 0;
+    updateSelectedLanguage();
   }
 }
 
@@ -153,6 +212,7 @@ function updateChannelGrid() {
   aatralCard.className = 'channel-card';
   aatralCard.dataset.index = '0';
   aatralCard.setAttribute('tabindex', '0'); // Make focusable for TV remotes
+  aatralCard.setAttribute('role', 'button');
   aatralCard.innerHTML = `
     <div class="channel-logo-container">
       <img src="aatral-tv/data/aatral.png" alt="Aatral TV" class="channel-logo">
@@ -164,6 +224,7 @@ function updateChannelGrid() {
         <span class="channel-language">Tamil</span>
       </div>
     </div>
+    <div class="tv-focus-indicator"></div>
   `;
   
   // Add click event for Aatral TV
@@ -200,6 +261,7 @@ function createChannelCard(channel, index) {
   card.dataset.channelNo = channel.channelNo;
   card.dataset.index = index.toString();
   card.setAttribute('tabindex', '0'); // Make focusable for TV remotes
+  card.setAttribute('role', 'button');
   
   card.innerHTML = `
     <div class="channel-logo-container">
@@ -214,7 +276,8 @@ function createChannelCard(channel, index) {
         <span class="channel-category">${channel.category}</span>
         <span class="channel-language">${channel.language}</span>
       </div>
-    </div>`;
+    </div>
+    <div class="tv-focus-indicator"></div>`;
   
   // Add click event
   card.addEventListener('click', () => {
@@ -234,10 +297,13 @@ function createChannelCard(channel, index) {
 function updateSelectedCard() {
   document.querySelectorAll('.channel-card').forEach((card) => {
     const cardIndex = parseInt(card.dataset.index || '0');
-    card.classList.toggle('selected', !isInNav && !isInDropdown && cardIndex === selectedIndex);
+    const isSelected = !isInNav && !isInDropdown && cardIndex === selectedIndex;
+    
+    card.classList.toggle('selected', isSelected);
+    card.classList.toggle('tv-focused', isSelected);
     
     // For Smart TVs, also update focus
-    if (!isInNav && !isInDropdown && cardIndex === selectedIndex) {
+    if (isSelected) {
       setTimeout(() => {
         card.focus();
       }, 50);
@@ -247,13 +313,17 @@ function updateSelectedCard() {
 
 function updateSelectedNavItem() {
   document.querySelectorAll('.nav-item').forEach((item, index) => {
-    item.classList.toggle('selected', isInNav && index === navIndex);
+    const isSelected = isInNav && index === navIndex;
+    
+    item.classList.toggle('selected', isSelected);
+    item.classList.toggle('tv-focused', isSelected);
+    
     if (index === 1) { // Filter nav item
       item.classList.toggle('open', isInDropdown);
     }
     
     // For Smart TVs, also update focus
-    if (isInNav && index === navIndex) {
+    if (isSelected) {
       setTimeout(() => {
         item.focus();
       }, 50);
@@ -264,10 +334,13 @@ function updateSelectedNavItem() {
 function updateSelectedLanguage() {
   const languageItems = document.querySelectorAll('.language-item');
   languageItems.forEach((item, index) => {
-    item.classList.toggle('selected', isInDropdown && index === languageIndex);
+    const isSelected = isInDropdown && index === languageIndex;
+    
+    item.classList.toggle('selected', isSelected);
+    item.classList.toggle('tv-focused', isSelected);
     
     // For Smart TVs, also update focus
-    if (isInDropdown && index === languageIndex) {
+    if (isSelected) {
       setTimeout(() => {
         item.focus();
       }, 50);
@@ -315,6 +388,22 @@ function handleNavigation(event) {
       case 'ArrowRight':
         if (languageIndex < totalLanguages - 1) {
           languageIndex++;
+          updateSelectedLanguage();
+        }
+        break;
+      case 'ArrowUp':
+        if (languageIndex >= 4) { // Assuming 4 items per row
+          languageIndex -= 4;
+          updateSelectedLanguage();
+        } else {
+          // Exit dropdown and go back to nav
+          isInDropdown = false;
+          updateSelectedNavItem();
+        }
+        break;
+      case 'ArrowDown':
+        if (languageIndex + 4 < totalLanguages) { // Assuming 4 items per row
+          languageIndex += 4;
           updateSelectedLanguage();
         }
         break;
@@ -474,6 +563,15 @@ async function initializeChannelList() {
   document.addEventListener('keydown', handleNavigation);
   window.addEventListener('resize', handleResize);
   
+  // Add focus indicators to nav items
+  document.querySelectorAll('.nav-item').forEach(item => {
+    if (!item.querySelector('.tv-focus-indicator')) {
+      const indicator = document.createElement('div');
+      indicator.className = 'tv-focus-indicator';
+      item.appendChild(indicator);
+    }
+  });
+  
   // For Smart TVs, add special handling for remote control
   if (isSmartTV()) {
     console.log('Smart TV detected, adding special remote control handling');
@@ -524,15 +622,6 @@ async function initializeChannelList() {
                 break;
             }
           }
-        });
-      });
-      
-      document.querySelectorAll('.language-item').forEach((item, index) => {
-        item.addEventListener('click', () => {
-          selectedLanguage = item.dataset.language;
-          filterChannels();
-          isInDropdown = false;
-          updateSelectedNavItem();
         });
       });
     }, 1000);
