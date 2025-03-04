@@ -171,18 +171,39 @@ function createChannelCard(channel, tabIndex) {
 }
 
 function updateSelectedCard() {
-  document.querySelectorAll('.channel-card').forEach((card, index) => {
-    card.classList.toggle('selected', !isInNav && !isInDropdown && index === selectedIndex);
+  // First, remove 'selected' class from all cards
+  document.querySelectorAll('.channel-card').forEach(card => {
+    card.classList.remove('selected');
   });
+  
+  // Then, add 'selected' class only to the currently selected card
+  if (!isInNav && !isInDropdown) {
+    const cards = document.querySelectorAll('.channel-card');
+    if (cards[selectedIndex]) {
+      cards[selectedIndex].classList.add('selected');
+    }
+  }
 }
 
 function updateSelectedNavItem() {
-  document.querySelectorAll('.nav-item').forEach((item, index) => {
-    item.classList.toggle('selected', isInNav && index === navIndex);
-    if (index === 1) { // Filter nav item
-      item.classList.toggle('open', isInDropdown);
-    }
+  // First, remove 'selected' class from all nav items
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('selected');
   });
+  
+  // Then, add 'selected' class only to the currently selected nav item
+  if (isInNav) {
+    const navItems = document.querySelectorAll('.nav-item');
+    if (navItems[navIndex]) {
+      navItems[navIndex].classList.add('selected');
+    }
+  }
+  
+  // Handle dropdown separately
+  const filterNavItem = document.querySelectorAll('.nav-item')[1]; // Filter nav item
+  if (filterNavItem) {
+    filterNavItem.classList.toggle('open', isInDropdown);
+  }
 }
 
 function updateSelectedLanguage() {
@@ -195,16 +216,10 @@ function updateSelectedLanguage() {
 function playChannel(channel) {
   currentVideoChannel = channel;
   
-  // Update the channel title in the player
-  const channelTitle = document.getElementById('currentChannelTitle');
-  if (channelTitle) {
-    channelTitle.textContent = channel.title;
-  }
-  
   // Show the video player overlay
   const videoOverlay = document.getElementById('videoPlayerOverlay');
   if (videoOverlay) {
-    videoOverlay.style.display = 'flex';
+    videoOverlay.style.display = 'block';
   }
   
   // Get the video player element
@@ -266,8 +281,8 @@ function navigateToChannel(channelIndex) {
 
 function handleNavigation(event) {
   // If video player is open, handle its navigation first
-  if (document.getElementById('videoPlayerOverlay').style.display === 'flex') {
-    if (event.key === 'Escape') {
+  if (document.getElementById('videoPlayerOverlay').style.display === 'block') {
+    if (event.key === 'Escape' || event.key === 'Backspace' || event.key === 'Back') {
       closeVideoPlayer();
       return;
     }
@@ -312,6 +327,8 @@ function handleNavigation(event) {
         }
         break;
       case 'Escape':
+      case 'Backspace':
+      case 'Back':
         isInDropdown = false;
         updateSelectedNavItem();
         break;
@@ -411,24 +428,10 @@ function handleNavigation(event) {
 }
 
 function setupVideoPlayerControls() {
-  const closeBtn = document.getElementById('closeVideoBtn');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', closeVideoPlayer);
-  }
-  
-  // Close video player when clicking outside the player container
-  const videoOverlay = document.getElementById('videoPlayerOverlay');
-  if (videoOverlay) {
-    videoOverlay.addEventListener('click', (event) => {
-      if (event.target === videoOverlay) {
-        closeVideoPlayer();
-      }
-    });
-  }
-  
-  // Add keyboard event listener for Escape key
+  // Add keyboard event listener for Escape key and Back button
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && videoOverlay.style.display === 'flex') {
+    if ((event.key === 'Escape' || event.key === 'Backspace' || event.key === 'Back') && 
+        document.getElementById('videoPlayerOverlay').style.display === 'block') {
       closeVideoPlayer();
     }
   });
