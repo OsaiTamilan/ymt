@@ -18,6 +18,13 @@ function updateSelectedCard() {
     const cards = document.querySelectorAll('.channel-card');
     if (cards[selectedIndex]) {
       cards[selectedIndex].classList.add('selected');
+      
+      // For TV remote support, also set focus on the selected card
+      try {
+        cards[selectedIndex].focus();
+      } catch (e) {
+        console.error('Error focusing card:', e);
+      }
     }
   }
 }
@@ -33,6 +40,13 @@ function updateSelectedNavItem() {
     const navItems = document.querySelectorAll('.nav-item');
     if (navItems[navIndex]) {
       navItems[navIndex].classList.add('selected');
+      
+      // For TV remote support, also set focus on the selected nav item
+      try {
+        navItems[navIndex].focus();
+      } catch (e) {
+        console.error('Error focusing nav item:', e);
+      }
     }
   }
   
@@ -47,14 +61,35 @@ function updateSelectedLanguage() {
   const languageItems = document.querySelectorAll('.language-item');
   languageItems.forEach((item, index) => {
     item.classList.toggle('selected', isInDropdown && index === languageIndex);
+    
+    // For TV remote support, also set focus on the selected language item
+    if (isInDropdown && index === languageIndex) {
+      try {
+        item.focus();
+      } catch (e) {
+        console.error('Error focusing language item:', e);
+      }
+    }
   });
 }
 
 // Handle keyboard navigation
 function handleNavigation(event, channels, filteredChannels, handleNumberInput, navigateToChannel, closeVideoPlayer, selectedLanguage, filterChannels, updateLanguageList) {
+  // Map common TV remote keys to standard keys
+  let key = event.key;
+  
+  // WebOS, Tizen, etc. might use different key codes
+  if (event.keyCode === 13) key = 'Enter';
+  if (event.keyCode === 37) key = 'ArrowLeft';
+  if (event.keyCode === 38) key = 'ArrowUp';
+  if (event.keyCode === 39) key = 'ArrowRight';
+  if (event.keyCode === 40) key = 'ArrowDown';
+  if (event.keyCode === 8 || event.keyCode === 27 || event.keyCode === 461) key = 'Back';
+  
   // If video player is open, handle its navigation first
-  if (document.getElementById('videoPlayerOverlay').style.display === 'block') {
-    if (event.key === 'Escape' || event.key === 'Backspace' || event.key === 'Back') {
+  if (document.getElementById('videoPlayerOverlay') && 
+      document.getElementById('videoPlayerOverlay').style.display === 'block') {
+    if (key === 'Escape' || key === 'Backspace' || key === 'Back') {
       closeVideoPlayer();
       return;
     }
@@ -64,8 +99,19 @@ function handleNavigation(event, channels, filteredChannels, handleNumberInput, 
   }
   
   // Handle number input (0-9)
-  if (event.key >= '0' && event.key <= '9') {
-    handleNumberInput(event.key, channels, (channelIndex) => {
+  if (key >= '0' && key <= '9' || 
+      (event.keyCode >= 48 && event.keyCode <= 57) || 
+      (event.keyCode >= 96 && event.keyCode <= 105)) {
+    
+    // Convert keyCode to number string if needed
+    let numberKey = key;
+    if (event.keyCode >= 48 && event.keyCode <= 57) {
+      numberKey = String(event.keyCode - 48);
+    } else if (event.keyCode >= 96 && event.keyCode <= 105) {
+      numberKey = String(event.keyCode - 96);
+    }
+    
+    handleNumberInput(numberKey, channels, (channelIndex) => {
       navigateToChannel(channelIndex);
     });
     return;
@@ -75,7 +121,7 @@ function handleNavigation(event, channels, filteredChannels, handleNumberInput, 
     const languageItems = document.querySelectorAll('.language-item');
     const totalLanguages = languageItems.length;
 
-    switch(event.key) {
+    switch(key) {
       case 'ArrowLeft':
         if (languageIndex > 0) {
           languageIndex--;
@@ -107,7 +153,7 @@ function handleNavigation(event, channels, filteredChannels, handleNumberInput, 
     }
   } else if (isInNav) {
     const navItems = document.querySelectorAll('.nav-item');
-    switch(event.key) {
+    switch(key) {
       case 'ArrowLeft':
         if (navIndex > 0) {
           navIndex--;
@@ -132,7 +178,16 @@ function handleNavigation(event, channels, filteredChannels, handleNumberInput, 
           updateSelectedNavItem();
           updateSelectedLanguage();
         } else {
-          const action = navItems[navIndex].querySelector('span:last-child').textContent.toLowerCase();
+          const navItem = navItems[navIndex];
+          // Check if there's a direct link
+          const link = navItem.querySelector('a');
+          if (link) {
+            window.location.href = link.href;
+            return;
+          }
+          
+          // Otherwise use the text content
+          const action = navItem.querySelector('span:last-child')?.textContent.toLowerCase();
           switch(action) {
             case 'home':
               window.location.href = 'index.html';
@@ -149,24 +204,32 @@ function handleNavigation(event, channels, filteredChannels, handleNumberInput, 
           }
         }
         break;
+      case 'Escape':
+      case 'Backspace':
+      case 'Back':
+        // On the main page, back button should do nothing or exit the app
+        break;
     }
   } else {
     const totalChannels = filteredChannels.length + 1; // +1 for Aatral TV card
 
-    switch(event.key) {
+    switch(key) {
       case 'ArrowUp':
         if (selectedIndex === 0) {
           isInNav = true;
           updateSelectedNavItem();
           updateSelectedCard();
-        } else {
+        } else if (selectedIndex >= COLUMNS) {
           selectedIndex = Math.max(0, selectedIndex - COLUMNS);
           updateSelectedCard();
         }
         break;
       case 'ArrowDown':
-        selectedIndex = Math.min(totalChannels - 1, selectedIndex + COLUMNS);
-        updateSelectedCard();
+        const nextRowIndex = selectedIndex + COLUMNS;
+        if (nextRowIndex < totalChannels) {
+          selectedIndex = nextRowIndex;
+          updateSelectedCard();
+        }
         break;
       case 'ArrowLeft':
         if (selectedIndex > 0) {
@@ -182,21 +245,130 @@ function handleNavigation(event, channels, filteredChannels, handleNumberInput, 
         break;
       case 'Enter':
         const selectedCard = document.querySelectorAll('.channel-card')[selectedIndex];
-        if (selectedIndex === 0) {
-          // Aatral TV card
-          window.location.href = 'aatral-tv/aatral-tv.html';
-        } else {
-          const channelIndex = selectedIndex - 1; // Adjust for Aatral TV card
-          navigateToChannel(channelIndex);
+        if (selectedCard) {
+          // Check if there's a direct link
+          const link = selectedCard.querySelector('a');
+          if (link) {
+            window.location.href = link.href;
+            return;
+          }
+          
+          if (selectedIndex === 0) {
+            // Aatral TV card
+            window.location.href = 'aatral-tv/aatral-tv.html';
+          } else {
+            const channelIndex = selectedIndex - 1; // Adjust for Aatral TV card
+            navigateToChannel(channelIndex);
+          }
         }
+        break;
+      case 'Escape':
+      case 'Backspace':
+      case 'Back':
+        isInNav = true;
+        updateSelectedNavItem();
+        updateSelectedCard();
         break;
     }
   }
 
+  // Ensure the selected card is visible
   const selectedCard = document.querySelector('.channel-card.selected');
   if (selectedCard) {
     selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
+}
+
+// Setup gamepad support for TV remotes
+function setupGamepadSupport(channels, filteredChannels, handleNumberInput, navigateToChannel, closeVideoPlayer, selectedLanguage, filterChannels, updateLanguageList) {
+  let gamepadState = {};
+  
+  function checkGamepads() {
+    const gamepads = navigator.getGamepads();
+    
+    for (let i = 0; i < gamepads.length; i++) {
+      const gamepad = gamepads[i];
+      if (!gamepad) continue;
+      
+      // Initialize state for this gamepad if needed
+      if (!gamepadState[gamepad.index]) {
+        gamepadState[gamepad.index] = {
+          buttons: Array(gamepad.buttons.length).fill(false),
+          axes: Array(gamepad.axes.length).fill(0)
+        };
+      }
+      
+      // Check buttons
+      for (let j = 0; j < gamepad.buttons.length; j++) {
+        const buttonPressed = gamepad.buttons[j].pressed;
+        
+        // Button was just pressed (not held down)
+        if (buttonPressed && !gamepadState[gamepad.index].buttons[j]) {
+          handleGamepadButton(j);
+        }
+        
+        // Update state
+        gamepadState[gamepad.index].buttons[j] = buttonPressed;
+      }
+      
+      // Check axes (D-pad is often on axes)
+      for (let j = 0; j < gamepad.axes.length; j++) {
+        const axisValue = gamepad.axes[j];
+        const prevValue = gamepadState[gamepad.index].axes[j];
+        
+        // Detect significant change in axis value
+        if (Math.abs(axisValue - prevValue) > 0.5) {
+          handleGamepadAxis(j, axisValue);
+        }
+        
+        // Update state
+        gamepadState[gamepad.index].axes[j] = axisValue;
+      }
+    }
+    
+    requestAnimationFrame(checkGamepads);
+  }
+  
+  function handleGamepadButton(buttonIndex) {
+    console.log('Gamepad button pressed:', buttonIndex);
+    
+    // Map common gamepad buttons to keys
+    switch (buttonIndex) {
+      case 0: // A button (typically primary/select)
+        handleNavigation({ key: 'Enter', keyCode: 13 }, channels, filteredChannels, handleNumberInput, navigateToChannel, closeVideoPlayer, selectedLanguage, filterChannels, updateLanguageList);
+        break;
+      case 1: // B button (typically back/cancel)
+        handleNavigation({ key: 'Back', keyCode: 27 }, channels, filteredChannels, handleNumberInput, navigateToChannel, closeVideoPlayer, selectedLanguage, filterChannels, updateLanguageList);
+        break;
+      case 12: // D-pad up
+        handleNavigation({ key: 'ArrowUp', keyCode: 38 }, channels, filteredChannels, handleNumberInput, navigateToChannel, closeVideoPlayer, selectedLanguage, filterChannels, updateLanguageList);
+        break;
+      case 13: // D-pad down
+        handleNavigation({ key: 'ArrowDown', keyCode: 40 }, channels, filteredChannels, handleNumberInput, navigateToChannel, closeVideoPlayer, selectedLanguage, filterChannels, updateLanguageList);
+        break;
+      case 14: // D-pad left
+        handleNavigation({ key: 'ArrowLeft', keyCode: 37 }, channels, filteredChannels, handleNumberInput, navigateToChannel, closeVideoPlayer, selectedLanguage, filterChannels, updateLanguageList);
+        break;
+      case 15: // D-pad right
+        handleNavigation({ key: 'ArrowRight', keyCode: 39 }, channels, filteredChannels, handleNumberInput, navigateToChannel, closeVideoPlayer, selectedLanguage, filterChannels, updateLanguageList);
+        break;
+    }
+  }
+  
+  function handleGamepadAxis(axisIndex, value) {
+    console.log('Gamepad axis changed:', axisIndex, value);
+    
+    // First two axes are typically left stick
+    if (axisIndex === 0 && value < -0.7) handleNavigation({ key: 'ArrowLeft', keyCode: 37 }, channels, filteredChannels, handleNumberInput, navigateToChannel, closeVideoPlayer, selectedLanguage, filterChannels, updateLanguageList);
+    if (axisIndex === 0 && value > 0.7) handleNavigation({ key: 'ArrowRight', keyCode: 39 }, channels, filteredChannels, handleNumberInput, navigateToChannel, closeVideoPlayer, selectedLanguage, filterChannels, updateLanguageList);
+    if (axisIndex === 1 && value < -0.7) handleNavigation({ key: 'ArrowUp', keyCode: 38 }, channels, filteredChannels, handleNumberInput, navigateToChannel, closeVideoPlayer, selectedLanguage, filterChannels, updateLanguageList);
+    if (axisIndex === 1 && value > 0.7) handleNavigation({ key: 'ArrowDown', keyCode: 40 }, channels, filteredChannels, handleNumberInput, navigateToChannel, closeVideoPlayer, selectedLanguage, filterChannels, updateLanguageList);
+  }
+  
+  window.addEventListener('gamepadconnected', (e) => {
+    console.log('Gamepad connected:', e.gamepad.id);
+    checkGamepads();
+  });
 }
 
 // Export navigation functions
@@ -210,5 +382,6 @@ export {
   updateSelectedCard,
   updateSelectedNavItem,
   updateSelectedLanguage,
-  handleNavigation
+  handleNavigation,
+  setupGamepadSupport
 };

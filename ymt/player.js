@@ -15,7 +15,7 @@ let autoHideTimeout = null;
 
 async function loadChannels() {
   try {
-    const response = await fetch('data/channels.m3u');
+    const response = await fetch('./data/channels.m3u');
     const data = await response.text();
     return parseM3U(data);
   } catch (error) {
@@ -72,7 +72,7 @@ function resetAutoHideTimer() {
       listsVisible = false;
       toggleListsVisibility(false);
     }
-  }, 4000); // 5 seconds
+  }, 5000); // 5 seconds
 }
 
 function toggleListsVisibility(show) {
@@ -124,11 +124,35 @@ function updateCategoriesList() {
     const div = document.createElement('div');
     div.className = 'category-item';
     div.dataset.index = index;
+    div.setAttribute('tabindex', '0'); // Make focusable for TV remotes
     if ((currentSection === 'category' && item === currentCategory) ||
         (currentSection === 'language' && item === currentLanguage)) {
       div.classList.add('selected');
     }
     div.textContent = item;
+    
+    // Add click event
+    div.addEventListener('click', () => {
+      if (currentSection === 'category') {
+        currentCategory = item;
+      } else if (currentSection === 'language') {
+        currentLanguage = item;
+      }
+      updateChannelList();
+    });
+    
+    // Add keyboard event for Enter key
+    div.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.keyCode === 13) {
+        if (currentSection === 'category') {
+          currentCategory = item;
+        } else if (currentSection === 'language') {
+          currentLanguage = item;
+        }
+        updateChannelList();
+      }
+    });
+    
     categoriesList.appendChild(div);
   });
 }
@@ -165,6 +189,7 @@ function createChannelElement(channel, index) {
   element.className = 'channel-item';
   element.dataset.index = index;
   element.dataset.channelNo = channel.channelNo;
+  element.setAttribute('tabindex', '0'); // Make focusable for TV remotes
   if (index === currentChannelIndex) element.classList.add('selected');
   
   element.innerHTML = `
@@ -173,6 +198,18 @@ function createChannelElement(channel, index) {
       <h3>${channel.channelNo ? `${channel.channelNo} - ` : ''}${channel.title}</h3>
     </div>
   `;
+  
+  // Add click event
+  element.addEventListener('click', () => {
+    loadChannel(index);
+  });
+  
+  // Add keyboard event for Enter key
+  element.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      loadChannel(index);
+    }
+  });
   
   return element;
 }
@@ -253,7 +290,7 @@ function updateNavSelection() {
     item.classList.toggle('selected', index === currentNavIndex);
     
     if (index === currentNavIndex) {
-      const section = item.querySelector('span:last-child').textContent.toLowerCase();
+      const section = item.querySelector('span:last-child')?.textContent.toLowerCase();
       if (section === 'language' || section === 'category') {
         currentSection = section;
         currentCategory = '';
@@ -418,7 +455,7 @@ function handleNavigation(event) {
       if (activeColumn === 0) {
         const navItems = document.querySelectorAll('.nav-item');
         const selectedNav = navItems[currentNavIndex];
-        const section = selectedNav.querySelector('span:last-child').textContent.toLowerCase();
+        const section = selectedNav.querySelector('span:last-child')?.textContent.toLowerCase();
         
         if (section === 'home') {
           navigateToPage('index.html');
@@ -434,6 +471,17 @@ function handleNavigation(event) {
       } else if (activeColumn === 2 && isPlayerPage) {
         listsVisible = false;
         loadChannel(currentChannelIndex);
+      }
+      break;
+      
+    case 'Escape':
+    case 'Backspace':
+    case 'Back':
+      if (isPlayerPage) {
+        listsVisible = false;
+        toggleListsVisibility(false);
+      } else {
+        navigateToPage('index.html');
       }
       break;
   }

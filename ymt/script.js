@@ -8,7 +8,8 @@ import {
   updateSelectedCard, 
   updateSelectedNavItem, 
   updateSelectedLanguage, 
-  handleNavigation 
+  handleNavigation,
+  setupGamepadSupport
 } from './js/navigation.js';
 
 async function fetchPlaylist() {
@@ -79,12 +80,12 @@ function updateLanguageList() {
   const sortedLanguages = Array.from(languages).sort();
   
   languageList.innerHTML = `
-    <div class="language-item ${!selectedLanguage ? 'selected' : ''}" data-language="">
+    <div class="language-item ${!selectedLanguage ? 'selected' : ''}" data-language="" tabindex="0">
       <span>All Languages</span>
       <span class="material-icons">check</span>
     </div>
     ${sortedLanguages.map(lang => `
-      <div class="language-item ${selectedLanguage === lang ? 'selected' : ''}" data-language="${lang}">
+      <div class="language-item ${selectedLanguage === lang ? 'selected' : ''}" data-language="${lang}" tabindex="0">
         <span>${lang}</span>
         <span class="material-icons">check</span>
       </div>
@@ -125,7 +126,6 @@ function updateChannelGrid() {
           <span class="channel-language">Tamil</span>
         </div>
       </div>
-      <div class="tv-focus-indicator"></div>
     </a>
   `;
   channelList.appendChild(aatralCard);
@@ -158,14 +158,20 @@ function createChannelCard(channel, tabIndex) {
         <span class="channel-category">${channel.category}</span>
         <span class="channel-language">${channel.language}</span>
       </div>
-    </div>
-    <div class="tv-focus-indicator"></div>`;
+    </div>`;
     
   card.innerHTML = content;
   
   // Add click event to play the channel
   card.addEventListener('click', () => {
     playChannel(channel);
+  });
+  
+  // Add keyboard event for Enter key
+  card.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      playChannel(channel);
+    }
   });
   
   return card;
@@ -240,11 +246,21 @@ function navigateToChannel(channelIndex) {
 function setupVideoPlayerControls() {
   // Add keyboard event listener for Escape key and Back button
   document.addEventListener('keydown', (event) => {
-    if ((event.key === 'Escape' || event.key === 'Backspace' || event.key === 'Back') && 
+    if ((event.key === 'Escape' || event.key === 'Backspace' || event.key === 'Back' || event.keyCode === 8 || event.keyCode === 27 || event.keyCode === 461) && 
         document.getElementById('videoPlayerOverlay').style.display === 'block') {
       closeVideoPlayer();
     }
   });
+  
+  // Add click event to close video when clicking outside the player
+  const videoOverlay = document.getElementById('videoPlayerOverlay');
+  if (videoOverlay) {
+    videoOverlay.addEventListener('click', (event) => {
+      if (event.target === videoOverlay) {
+        closeVideoPlayer();
+      }
+    });
+  }
 }
 
 function setupKeyboardNavigation() {
@@ -280,6 +296,18 @@ async function initializeChannelList() {
   updateSelectedNavItem();
   setupVideoPlayerControls();
   setupKeyboardNavigation();
+  
+  // Setup gamepad support
+  setupGamepadSupport(
+    channels, 
+    filteredChannels, 
+    handleNumberInput, 
+    navigateToChannel, 
+    closeVideoPlayer, 
+    selectedLanguage, 
+    filterChannels, 
+    updateLanguageList
+  );
 }
 
 document.addEventListener('DOMContentLoaded', () => {
