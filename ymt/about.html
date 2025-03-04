@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>About - TV Channels</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="styles.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script type="module">
+      // Simple navigation script for about page
+      document.addEventListener('DOMContentLoaded', () => {
+        const navItems = document.querySelectorAll('.nav-item');
+        let selectedIndex = 0;
+
+        // Find the initially selected item
+        navItems.forEach((item, index) => {
+          if (item.classList.contains('selected')) {
+            selectedIndex = index;
+          }
+        });
+
+        // Function to update the selected nav item
+        function updateSelectedNav() {
+          navItems.forEach((item, index) => {
+            item.classList.remove('selected');
+            if (index === selectedIndex) {
+              item.classList.add('selected');
+            }
+          });
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+            selectedIndex = (selectedIndex + 1) % navItems.length;
+            updateSelectedNav();
+          } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+            selectedIndex = (selectedIndex - 1 + navItems.length) % navItems.length;
+            updateSelectedNav();
+          } else if (event.key === 'Enter') {
+            // Handle navigation based on selected item
+            const selectedItem = navItems[selectedIndex].querySelector('span:last-child').textContent.toLowerCase();
+            
+            switch (selectedItem) {
+              case 'home':
+                window.location.href = 'index.html';
+                break;
+              case 'language':
+              case 'category':
+                window.location.href = 'index.html';
+                break;
+              case 'about':
+                window.location.href = 'about.html';
+                break;
+              case 'settings':
+                window.location.href = 'settings.html';
+                break;
+              case 'aatral tv':
+                window.location.href = 'aatral-tv/aatral-tv.html';
+                break;
+            }
+          } else if (event.key === 'Escape' || event.key === 'Backspace') {
+            window.location.href = 'index.html';
+          }
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <main class="home-page">
+      <div class="featured-banner">
+        <h1>About - TV Channels</h1>
+      </div>
+      <nav class="main-nav-bar">
+        <div class="nav-item" tabindex="0" role="button" aria-label="Home">
+          <span class="material-icons">home</span>
+          <span>Home</span>
+        </div>
+        <div class="nav-item" tabindex="0" role="button" aria-label="Filter">
+          <span class="material-icons">filter_list</span>
+          <span>Filter</span>
+        </div>
+        <div class="nav-item selected" tabindex="0" role="button" aria-label="About">
+          <span class="material-icons">info</span>
+          <span>About</span>
+        </div>
+        <div class="nav-item" tabindex="0" role="button" aria-label="Settings">
+          <span class="material-icons">settings</span>
+          <span>Settings</span>
+        </div>
+        <div class="nav-item" tabindex="0" role="button" aria-label="Aatral TV">
+          <a href="aatral-tv/aatral-tv.html" style="display: flex; align-items: center; padding: 10px 20px; background: rgba(0, 255, 0, 0.15); border: 1px solid rgba(0, 255, 0, 0.5); border-radius: 4px; color: white; text-decoration: none;">
+            <span class="material-icons" style="margin-right: 5px;">tv</span>
+            Watch Aatral TV
+          </a>
+        </div>
+      </nav>
+      <div class="about-content">
+        <div class="about-section">
+          <h2>Welcome to Our TV Channel App</h2>
+          <p>This application provides access to various TV channels across different categories and languages.</p>
+          
+          <h3>Features</h3>
+          <ul>
+            <li>Browse channels by category</li>
+            <li>Filter channels by language</li>
+            <li>Direct channel access using number keys</li>
+            <li>Easy navigation using D-pad controls</li>
+          </ul>
+          
+          <h3>Controls</h3>
+          <ul>
+            <li>Up/Down/Left/Right: Navigate through channels</li>
+            <li>Enter: Select</li>
+            <li>Number keys (0-9): Direct channel access</li>
+            <li>Escape/Back: Return to previous screen</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

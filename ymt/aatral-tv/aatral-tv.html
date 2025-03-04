@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Player</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+      /* Additional styles to ensure YouTube elements are hidden */
+      :root {
+        --yt-spec-brand-button-background: transparent !important;
+        --yt-spec-brand-background-solid: transparent !important;
+        --yt-spec-general-background-a: transparent !important;
+        --yt-spec-brand-background-primary: transparent !important;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="main-nav">
+      <div class="nav-item selected">
+        <span class="material-icons">WelCome</span>
+        <span>WelCome</span>
+      </div>
+      <div class="nav-item">
+        <span class="material-icons">home</span>
+        <span>Home</span>
+      </div>
+      <div class="nav-item">
+        <span class="material-icons">language</span>
+        <span>Language</span>
+      </div>
+      <div class="nav-item">
+        <span class="material-icons">category</span>
+        <span>Category</span>
+      </div>
+      <div class="nav-item">
+        <span class="material-icons">info</span>
+        <span>About</span>
+      </div>
+      <div class="nav-item">
+        <span class="material-icons">settings</span>
+        <span>Settings</span>
+      </div>
+    </nav>
+    <div id="channel-logo">
+      <img src="data/aatral.png" alt="Aatral TV">
+    </div>
+    <div id="player-container">
+      <div id="loading-spinner" class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+      <div id="youtube-player"></div>
+    </div>
+    <script type="module" src="js/navBar.js"></script>
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
