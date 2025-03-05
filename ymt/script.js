@@ -12,6 +12,9 @@ import {
   setupGamepadSupport
 } from './js/navigation.js';
 
+let menuIndex = 0;
+let menuHideTimeout = null;
+
 async function fetchPlaylist() {
   try {
     const response = await fetch('./data/channels.m3u');
@@ -243,6 +246,76 @@ function navigateToChannel(channelIndex) {
   }
 }
 
+function setupVideoOverlayMenu() {
+  const menu = document.getElementById('menu');
+  
+  function updateSelectedMenuItem() {
+    document.querySelectorAll('.menu-item').forEach((item, index) => {
+      item.classList.toggle('selected', index === menuIndex);
+    });
+  }
+
+  function resetMenuTimeout() {
+    if (menuHideTimeout) {
+      clearTimeout(menuHideTimeout);
+    }
+    menuHideTimeout = setTimeout(() => {
+      menu.style.display = 'none';
+    }, 3000);
+  }
+
+  // Add keyboard event listener for video overlay navigation
+  document.addEventListener('keydown', (event) => {
+    const videoOverlay = document.getElementById('videoPlayerOverlay');
+    
+    if (videoOverlay.style.display === 'block') {
+      if (menu.style.display === 'flex') {
+        switch (event.key) {
+          case 'ArrowDown':
+            if (menuIndex < 4) {
+              menuIndex++;
+              updateSelectedMenuItem();
+              resetMenuTimeout();
+            }
+            break;
+          case 'ArrowUp':
+            if (menuIndex > 0) {
+              menuIndex--;
+              updateSelectedMenuItem();
+              resetMenuTimeout();
+            }
+            break;
+          case 'ArrowLeft':
+            menu.style.display = 'none';
+            break;
+          case 'Enter':
+            const selectedItem = document.querySelectorAll('.menu-item')[menuIndex];
+            const action = selectedItem.getAttribute('data-action');
+            switch(action) {
+              case 'home':
+                window.location.href = 'index.html';
+                break;
+              case 'about':
+                window.location.href = 'about.html';
+                break;
+              case 'settings':
+                window.location.href = 'settings.html';
+                break;
+              case 'language':
+              case 'category':
+                window.location.href = 'index.html';
+                break;
+            }
+            break;
+        }
+      } else if (event.key === 'ArrowRight') {
+        menu.style.display = 'flex';
+        resetMenuTimeout();
+      }
+    }
+  });
+}
+
 function setupVideoPlayerControls() {
   // Add keyboard event listener for Escape key and Back button
   document.addEventListener('keydown', (event) => {
@@ -254,10 +327,18 @@ function setupVideoPlayerControls() {
   
   // Add click event to close video when clicking outside the player
   const videoOverlay = document.getElementById('videoPlayerOverlay');
+  const menu = document.getElementById('menu');
+
   if (videoOverlay) {
     videoOverlay.addEventListener('click', (event) => {
       if (event.target === videoOverlay) {
         closeVideoPlayer();
+      }
+    });
+    
+    videoOverlay.addEventListener('mousemove', () => {
+      if (menu.style.display === 'flex') {
+        resetMenuTimeout();
       }
     });
   }
@@ -314,5 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const isHomePage = document.querySelector('.home-page') !== null;
   if (isHomePage) {
     initializeChannelList();
+    setupVideoOverlayMenu();
   }
 });
