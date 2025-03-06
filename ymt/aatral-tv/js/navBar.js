@@ -78,10 +78,10 @@ function handleNavigation(event) {
           window.location.href = '../../ymt/index.html';
           break;
         case 'language':
-          window.location.href = '../../ymt/player.html';
+          window.location.href = '../../ymt/index.html';
           break;
         case 'category':
-          window.location.href = '../../ymt/player.html';
+          window.location.href = '../../ymt/index.html';
           break;
         case 'about':
           window.location.href = '../../ymt/about.html';
