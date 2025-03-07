@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Aatral-TV</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="player.css" />
+    <link rel="stylesheet" href="ad.css" />
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script type="module" src="player.js"></script>
+    <script type="module" src="adManager.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3814157539218486" crossorigin="anonymous"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGPRE8YK2Q"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-DGPRE8YK2Q');
+    </script>
+  </head>
+  <body>
+    <main class="player-page">
+      <div class="player-container">
+        <nav class="main-nav">
+          <div class="nav-item selected">
+            <span class="material-icons">home</span>
+            <span>Home</span>
+          </div>
+          <div class="nav-item">
+            <span class="material-icons">language</span>
+            <span>Language</span>
+          </div>
+          <div class="nav-item">
+            <span class="material-icons">category</span>
+            <span>Category</span>
+          </div>
+          <div class="nav-item">
+            <span class="material-icons">info</span>
+            <span>About</span>
+          </div>
+          <div class="nav-item">
+            <span class="material-icons">settings</span>
+            <span>Settings</span>
+          </div>
+        </nav>
+        <div class="categories-list">
+          <!-- Will be populated by JavaScript -->
+        </div>
+        <div id="channelListSection" class="channel-list-section">
+          <div id="channelList" class="channel-list">
+            WelCome...
+          </div>
+        </div>
+        <div class="video-section">
+          <div class="video-container">
+            <video id="videoPlayer" playsinline></video>
+          </div>
+        </div>
+      </div>
+      <div class="ad-container">
+        <!-- Aatral TV TV -->
+        <ins class="adsbygoogle"
+             style="display:inline-block;width:728px;height:90px"
+             data-ad-client="ca-pub-3814157539218486"
+             data-ad-slot="2895961035"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
+    </main>
+  </body>
+</html>
