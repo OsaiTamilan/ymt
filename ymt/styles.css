@@ -211,7 +211,7 @@ main {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  margin-top: calc(17vh + 60px); /* Height of banner + nav */
+  margin-top: calc(20vh + 60px); /* Height of banner + nav */
 }
 
 .channel-grid {
@@ -220,6 +220,8 @@ main {
   gap: 1rem;
   padding: 0.5rem;
   width: 100%;
+  scroll-behavior: smooth;
+  scroll-padding: 1rem;
 }
 
 .channel-card {
@@ -234,6 +236,7 @@ main {
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  scroll-margin: 1rem;
 }
 
 .channel-card:hover {
