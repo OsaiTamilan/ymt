@@ -8,8 +8,7 @@ import {
   updateSelectedCard, 
   updateSelectedNavItem, 
   updateSelectedLanguage, 
-  handleNavigation,
-  setupGamepadSupport
+  handleNavigation
 } from './js/navigation.js';
 
 let menuIndex = 0;
@@ -317,14 +316,6 @@ function setupVideoOverlayMenu() {
 }
 
 function setupVideoPlayerControls() {
-  // Add keyboard event listener for Escape key and Back button
-  document.addEventListener('keydown', (event) => {
-    if ((event.key === 'Escape' || event.key === 'Backspace' || event.key === 'Back' || event.keyCode === 8 || event.keyCode === 27 || event.keyCode === 461) && 
-        document.getElementById('videoPlayerOverlay').style.display === 'block') {
-      closeVideoPlayer();
-    }
-  });
-  
   // Add click event to close video when clicking outside the player
   const videoOverlay = document.getElementById('videoPlayerOverlay');
   const menu = document.getElementById('menu');
@@ -377,18 +368,6 @@ async function initializeChannelList() {
   updateSelectedNavItem();
   setupVideoPlayerControls();
   setupKeyboardNavigation();
-  
-  // Setup gamepad support
-  setupGamepadSupport(
-    channels, 
-    filteredChannels, 
-    handleNumberInput, 
-    navigateToChannel, 
-    closeVideoPlayer, 
-    selectedLanguage, 
-    filterChannels, 
-    updateLanguageList
-  );
 }
 
 document.addEventListener('DOMContentLoaded', () => {

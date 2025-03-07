@@ -5,61 +5,69 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="ad.css" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script type="module" src="script.js"></script>
   </head>
   <body>
     <main class="home-page">
-      <div class="featured-banner">
-        <h1>Aatral in TV Channels</h1>
-        <div class="featured-info">
-          <p>Browse and watch your favorite channels</p>
-          <p class="navigation-hint">Use arrow keys to navigate, Enter to select, or type channel number directly</p>
-        </div>
-      </div>
-      <nav class="main-nav-bar">
-        <div class="nav-item" tabindex="0" role="button" aria-label="Home">
-          <span class="material-icons">home</span>
-          <span>Home</span>
-        </div>
-        <div class="nav-item has-dropdown" tabindex="0" role="button" aria-label="Filter">
-          <span class="material-icons">filter_list</span>
-          <span>Filter</span>
-          <div class="dropdown-menu">
-            <div class="dropdown-header">
-              <span class="material-icons">language</span>
-              <span>Languages</span>
-            </div>
-            <div class="language-list">
-              <!-- Will be populated by JavaScript -->
+      <div class="header-container">
+        <div class="featured-banner">
+          <div class="banner-content">
+            <h1>Aatral in TV Channels</h1>
+            <div class="featured-info">
+              <p>Browse and watch your favorite channels</p>
+              <p class="navigation-hint">Use arrow keys to navigate, Enter to select, or type channel number directly</p>
             </div>
           </div>
+          <div class="banner-logo">
+            <img src="data/aatral.png" alt="Aatral TV Logo">
+          </div>
         </div>
-        <div class="nav-item" tabindex="0" role="button" aria-label="About">
-          <span class="material-icons">info</span>
-          <span>About</span>
-        </div>
-        <div class="nav-item" tabindex="0" role="button" aria-label="Settings">
-          <span class="material-icons">settings</span>
-          <span>Settings</span>
-        </div>
-        <div class="nav-item" tabindex="0" role="button" aria-label="Aatral TV">
-          <a href="aatral-tv/aatral-tv.html" style="display: flex; align-items: center; padding: 10px 20px; background: rgba(0, 255, 0, 0.15); border: 1px solid rgba(0, 255, 0, 0.5); border-radius: 4px; color: white; text-decoration: none;">
-            <span class="material-icons" style="margin-right: 5px;">tv</span>
-            Watch Aatral TV
-          </a>
-        </div>
-      </nav>
+        <nav class="main-nav-bar">
+          <div class="nav-item" tabindex="0" role="button" aria-label="Home">
+            <span class="material-icons">home</span>
+            <span>Home</span>
+          </div>
+          <div class="nav-item has-dropdown" tabindex="0" role="button" aria-label="Filter">
+            <span class="material-icons">filter_list</span>
+            <span>Filter</span>
+            <div class="dropdown-menu">
+              <div class="dropdown-header">
+                <span class="material-icons">language</span>
+                <span>Languages</span>
+              </div>
+              <div class="language-list">
+                <!-- Will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+          <div class="nav-item" tabindex="0" role="button" aria-label="About">
+            <span class="material-icons">info</span>
+            <span>About</span>
+          </div>
+          <div class="nav-item" tabindex="0" role="button" aria-label="Settings">
+            <span class="material-icons">settings</span>
+            <span>Settings</span>
+          </div>
+          <div class="nav-item" tabindex="0" role="button" aria-label="Aatral TV">
+            <a href="aatral-tv/aatral-tv.html" style="display: flex; align-items: center; padding: 10px 20px; background: rgba(0, 255, 0, 0.15); border: 1px solid rgba(0, 255, 0, 0.5); border-radius: 4px; color: white; text-decoration: none;">
+              <span class="material-icons" style="margin-right: 5px;">tv</span>
+              Watch Aatral TV
+            </a>
+          </div>
+        </nav>
+      </div>
       <div class="channels-container">
         <div id="channelList" class="channel-grid">
           <div class="loading">Loading channels...</div>
         </div>
       </div>
       <div id="numberDisplay"></div>
-      
-      <!-- Video player overlay -->
+    </main>
+       
+    <!-- Video player overlay -->
+    <div class="overlay-container">
       <div id="videoPlayerOverlay" class="video-player-overlay">
         <!-- Navigation menu -->
         <div id="menu" class="video-menu">
@@ -86,6 +94,6 @@
         </div>
         <video id="videoPlayer" controls playsinline></video>
       </div>
-    </main>
+    </div>
   </body>
 </html>
