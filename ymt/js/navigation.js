@@ -16,7 +16,12 @@ function updateSelectedCard() {
     const cards = document.querySelectorAll('.channel-card');
     if (cards[selectedIndex]) {
       cards[selectedIndex].classList.add('selected');
-      cards[selectedIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      // Improved scrolling behavior for TV
+      cards[selectedIndex].scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center',
+        inline: 'center'
+      });
     }
   }
 }
