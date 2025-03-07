@@ -93,6 +93,7 @@ main {
   padding: 0.5rem 2rem;
   background: rgba(0, 0, 0, 0.95);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  height: 70px;
 }
 
 .nav-item {
@@ -210,7 +211,7 @@ main {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  margin-top: 280px; /* Adjusted spacing from nav bar */
+  margin-top: 230px; /* Adjusted spacing from nav bar */
 }
 
 .channel-grid {
