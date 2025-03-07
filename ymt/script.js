@@ -302,7 +302,7 @@ function setupVideoOverlayMenu() {
                 break;
               case 'language':
               case 'category':
-                window.location.href = 'index.html';
+                window.location.href = 'player.html';
                 break;
             }
             break;
