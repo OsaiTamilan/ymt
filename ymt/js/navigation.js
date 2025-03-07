@@ -16,12 +16,18 @@ function updateSelectedCard() {
     const cards = document.querySelectorAll('.channel-card');
     if (cards[selectedIndex]) {
       cards[selectedIndex].classList.add('selected');
-      // Improved scrolling behavior for TV
-      cards[selectedIndex].scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center',
-        inline: 'center'
-      });
+      
+      // Ensure smooth scrolling and proper focus for TV
+      try {
+        cards[selectedIndex].focus();
+        cards[selectedIndex].scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'center'
+        });
+      } catch (e) {
+        console.error('Error focusing card:', e);
+      }
     }
   }
 }
@@ -35,6 +41,12 @@ function updateSelectedNavItem() {
     const navItems = document.querySelectorAll('.nav-item');
     if (navItems[navIndex]) {
       navItems[navIndex].classList.add('selected');
+      
+      try {
+        navItems[navIndex].focus();
+      } catch (e) {
+        console.error('Error focusing nav item:', e);
+      }
     }
   }
   
@@ -47,6 +59,14 @@ function updateSelectedNavItem() {
 function updateSelectedLanguage() {
   document.querySelectorAll('.language-item').forEach((item, index) => {
     item.classList.toggle('selected', isInDropdown && index === languageIndex);
+    
+    if (isInDropdown && index === languageIndex) {
+      try {
+        item.focus();
+      } catch (e) {
+        console.error('Error focusing language item:', e);
+      }
+    }
   });
 }
 
