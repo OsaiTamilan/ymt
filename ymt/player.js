@@ -68,8 +68,10 @@ function parseM3U(content) {
 }
 
 function clearAllSelections() {
+  // Remove all selection classes and borders
   document.querySelectorAll('.nav-item, .category-item, .channel-item').forEach(item => {
     item.classList.remove('selected');
+    item.style.border = 'none';
   });
 }
 
@@ -77,30 +79,26 @@ function updateSelectionStates() {
   // First clear all selections
   clearAllSelections();
 
-  // Update navigation selection
-  const navItems = document.querySelectorAll('.nav-item');
-  if (activeColumn === 0 && currentNavIndex >= 0 && currentNavIndex < navItems.length) {
-    navItems[currentNavIndex].classList.add('selected');
+  // Only apply selection to the active column
+  if (activeColumn === 0) {
+    const navItems = document.querySelectorAll('.nav-item');
+    if (currentNavIndex >= 0 && currentNavIndex < navItems.length) {
+      const selectedItem = navItems[currentNavIndex];
+      selectedItem.classList.add('selected');
+    }
+  } else if (activeColumn === 1) {
+    const categoryItems = document.querySelectorAll('.category-item');
+    if (currentCategoryIndex >= 0 && currentCategoryIndex < categoryItems.length) {
+      const selectedItem = categoryItems[currentCategoryIndex];
+      selectedItem.classList.add('selected');
+    }
+  } else if (activeColumn === 2) {
+    const channelItems = document.querySelectorAll('.channel-item');
+    if (currentChannelIndex >= 0 && currentChannelIndex < channelItems.length) {
+      const selectedItem = channelItems[currentChannelIndex];
+      selectedItem.classList.add('selected');
+    }
   }
-
-  // Update category selection
-  const categoryItems = document.querySelectorAll('.category-item');
-  if (activeColumn === 1 && currentCategoryIndex >= 0 && currentCategoryIndex < categoryItems.length) {
-    categoryItems[currentCategoryIndex].classList.add('selected');
-  }
-
-  // Update channel selection
-  const channelItems = document.querySelectorAll('.channel-item');
-  if (activeColumn === 2 && currentChannelIndex >= 0 && currentChannelIndex < channelItems.length) {
-    channelItems[currentChannelIndex].classList.add('selected');
-  }
-
-  // Force a repaint to ensure visual updates
-  requestAnimationFrame(() => {
-    document.body.style.visibility = 'hidden';
-    document.body.offsetHeight;
-    document.body.style.visibility = '';
-  });
 }
 
 function resetAutoHideTimer() {
@@ -134,11 +132,7 @@ function toggleListsVisibility(show) {
     categoriesList.style.display = 'block';
     channelListSection.style.display = 'block';
     resetAutoHideTimer();
-    
-    // Ensure selection states are correct when showing lists
-    requestAnimationFrame(() => {
-      updateSelectionStates();
-    });
+    updateSelectionStates();
   } else {
     mainNav.style.width = '0';
     categoriesList.style.width = '0';
@@ -173,10 +167,7 @@ function updateCategoriesList() {
     categoriesList.appendChild(div);
   });
 
-  // Ensure selection states are updated after DOM changes
-  requestAnimationFrame(() => {
-    updateSelectionStates();
-  });
+  updateSelectionStates();
 }
 
 function updateChannelList() {
@@ -205,10 +196,7 @@ function updateChannelList() {
     loadChannel(0);
   }
 
-  // Ensure selection states are updated after DOM changes
-  requestAnimationFrame(() => {
-    updateSelectionStates();
-  });
+  updateSelectionStates();
 }
 
 function createChannelElement(channel, index) {
@@ -258,10 +246,7 @@ function loadChannel(index) {
     });
   }
   
-  // Update selection states after channel change
-  requestAnimationFrame(() => {
-    updateSelectionStates();
-  });
+  updateSelectionStates();
 }
 
 function handleNavigation(event) {
