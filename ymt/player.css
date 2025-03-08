@@ -113,12 +113,13 @@ main {
 
 .channel-info {
   text-align: center;
+  overflow: hidden;
 }
 
 .channel-info h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.2rem;
-  white-space: break-spaces;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
