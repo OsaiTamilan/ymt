@@ -67,35 +67,40 @@ function parseM3U(content) {
   return channels;
 }
 
+function clearAllSelections() {
+  document.querySelectorAll('.nav-item, .category-item, .channel-item').forEach(item => {
+    item.classList.remove('selected');
+  });
+}
+
 function updateSelectionStates() {
+  // First clear all selections
+  clearAllSelections();
+
   // Update navigation selection
   const navItems = document.querySelectorAll('.nav-item');
-  navItems.forEach((item, index) => {
-    item.classList.toggle('selected', activeColumn === 0 && index === currentNavIndex);
-  });
+  if (activeColumn === 0 && currentNavIndex >= 0 && currentNavIndex < navItems.length) {
+    navItems[currentNavIndex].classList.add('selected');
+  }
 
   // Update category selection
   const categoryItems = document.querySelectorAll('.category-item');
-  categoryItems.forEach((item, index) => {
-    item.classList.toggle('selected', activeColumn === 1 && index === currentCategoryIndex);
-  });
+  if (activeColumn === 1 && currentCategoryIndex >= 0 && currentCategoryIndex < categoryItems.length) {
+    categoryItems[currentCategoryIndex].classList.add('selected');
+  }
 
   // Update channel selection
   const channelItems = document.querySelectorAll('.channel-item');
-  channelItems.forEach((item, index) => {
-    item.classList.toggle('selected', activeColumn === 2 && index === currentChannelIndex);
-  });
-
-  // Update active column styles
-  const mainNav = document.querySelector('.main-nav');
-  const categoriesList = document.querySelector('.categories-list');
-  const channelList = document.querySelector('.channel-list');
-
-  if (mainNav && categoriesList && channelList) {
-    mainNav.classList.toggle('active', activeColumn === 0);
-    categoriesList.classList.toggle('active', activeColumn === 1);
-    channelList.classList.toggle('active', activeColumn === 2);
+  if (activeColumn === 2 && currentChannelIndex >= 0 && currentChannelIndex < channelItems.length) {
+    channelItems[currentChannelIndex].classList.add('selected');
   }
+
+  // Force a repaint to ensure visual updates
+  requestAnimationFrame(() => {
+    document.body.style.visibility = 'hidden';
+    document.body.offsetHeight;
+    document.body.style.visibility = '';
+  });
 }
 
 function resetAutoHideTimer() {
@@ -107,7 +112,7 @@ function resetAutoHideTimer() {
       listsVisible = false;
       toggleListsVisibility(false);
     }
-  }, 4000);
+  }, 40000);
 }
 
 function toggleListsVisibility(show) {
@@ -129,7 +134,11 @@ function toggleListsVisibility(show) {
     categoriesList.style.display = 'block';
     channelListSection.style.display = 'block';
     resetAutoHideTimer();
-    updateSelectionStates();
+    
+    // Ensure selection states are correct when showing lists
+    requestAnimationFrame(() => {
+      updateSelectionStates();
+    });
   } else {
     mainNav.style.width = '0';
     categoriesList.style.width = '0';
@@ -164,7 +173,10 @@ function updateCategoriesList() {
     categoriesList.appendChild(div);
   });
 
-  updateSelectionStates();
+  // Ensure selection states are updated after DOM changes
+  requestAnimationFrame(() => {
+    updateSelectionStates();
+  });
 }
 
 function updateChannelList() {
@@ -193,7 +205,10 @@ function updateChannelList() {
     loadChannel(0);
   }
 
-  updateSelectionStates();
+  // Ensure selection states are updated after DOM changes
+  requestAnimationFrame(() => {
+    updateSelectionStates();
+  });
 }
 
 function createChannelElement(channel, index) {
@@ -243,11 +258,10 @@ function loadChannel(index) {
     });
   }
   
-  updateSelectionStates();
-  
-  if (!listsVisible) {
-    toggleListsVisibility(false);
-  }
+  // Update selection states after channel change
+  requestAnimationFrame(() => {
+    updateSelectionStates();
+  });
 }
 
 function handleNavigation(event) {
