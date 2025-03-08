@@ -147,7 +147,7 @@ main {
   color: #666;
 }
 
-/* Keep existing styles below */
+/* Player Page Styles */
 .player-page {
   margin: 0;
   padding: 0;
@@ -165,7 +165,7 @@ main {
   position: relative;
 }
 
-/* Main Navigation (5%) */
+/* Main Navigation */
 .main-nav {
   width: 8%;
   background: #111;
@@ -179,11 +179,6 @@ main {
   transition: all 0.3s ease;
 }
 
-.main-nav.active .nav-item.selected {
-  background: rgba(0, 255, 0, 0.15);
-  border: 1px solid rgba(0, 255, 0, 0.5);
-}
-
 .nav-item {
   display: flex;
   flex-direction: column;
@@ -194,23 +189,29 @@ main {
   width: 100%;
   opacity: 0.7;
   transition: all 0.2s ease;
-}
-
-.nav-item span {
-  font-size: 0.8rem;
+  border: 2px solid transparent;
 }
 
 .nav-item .material-icons {
   font-size: 1.5rem;
 }
 
-.nav-item:hover,
-.nav-item.selected {
+.nav-item span:last-child {
+  font-size: 0.8rem;
+}
+
+.nav-item:hover {
   opacity: 1;
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Categories List (10%) */
+.nav-item.selected {
+  opacity: 1;
+  background: rgba(0, 255, 0, 0.15);
+  border: 2px solid rgba(0, 255, 0, 0.5);
+}
+
+/* Categories List */
 .categories-list {
   width: 10%;
   background: #161616;
@@ -221,11 +222,6 @@ main {
   transition: all 0.3s ease;
 }
 
-.categories-list.active .category-item.selected {
-  background: rgba(0, 255, 0, 0.15);
-  border: 1px solid rgba(0, 255, 0, 0.5);
-}
-
 .category-item {
   padding: 0.8rem;
   cursor: pointer;
@@ -233,35 +229,25 @@ main {
   margin-bottom: 0.5rem;
   transition: all 0.2s ease;
   font-size: 1.1rem;
+  border: 2px solid transparent;
 }
 
-.category-item:hover,
-.category-item.selected {
+.category-item:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Channel List Section (15%) */
+.category-item.selected {
+  background: rgba(0, 255, 0, 0.15);
+  border: 2px solid rgba(0, 255, 0, 0.5);
+}
+
+/* Channel List Section */
 .channel-list-section {
   width: 15%;
   background: #1a1a1a;
   height: 100vh;
   overflow: hidden;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-}
-
-.channel-list.active .channel-item.selected {
-  background: rgba(0, 255, 0, 0.15);
-  border: 1px solid rgba(0, 255, 0, 0.5);
-}
-
-/* Video Section */
-.video-section {
-  flex: 1;
-  min-width: 0;
-  height: 100vh;
-  position: relative;
-  background: #000;
   transition: all 0.3s ease;
 }
 
@@ -296,6 +282,7 @@ main {
   margin-bottom: 0.8rem;
   background: rgba(255, 255, 255, 0.05);
   transition: all 0.2s ease;
+  border: 2px solid transparent;
 }
 
 .channel-item:hover {
@@ -304,7 +291,7 @@ main {
 
 .channel-item.selected {
   background: rgba(0, 255, 0, 0.15);
-  border: 1px solid rgba(0, 255, 0, 0.5);
+  border: 2px solid rgba(0, 255, 0, 0.5);
 }
 
 .channel-item-logo {
@@ -314,17 +301,14 @@ main {
   margin-right: 1rem;
 }
 
-.channel-info {
+/* Video Section */
+.video-section {
   flex: 1;
   min-width: 0;
-}
-
-.channel-info h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  height: 100vh;
+  position: relative;
+  background: #000;
+  transition: all 0.3s ease;
 }
 
 .video-container {
@@ -355,71 +339,6 @@ main {
   font-weight: bold;
   display: none;
   z-index: 1000;
-}
-
-/* About and Settings Pages */
-.about-content,
-.settings-content {
-  flex: 1;
-  padding: 2rem;
-  background: #1a1a1a;
-  overflow-y: auto;
-}
-
-.about-section,
-.settings-section {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.about-section h1,
-.settings-section h1 {
-  font-size: 2.5rem;
-  margin-bottom: 2rem;
-  color: #fff;
-}
-
-.about-section h2,
-.settings-section h2 {
-  font-size: 1.8rem;
-  margin: 1.5rem 0;
-  color: #fff;
-}
-
-.about-section h3,
-.settings-section h3 {
-  font-size: 1.4rem;
-  margin: 1.2rem 0;
-  color: #ddd;
-}
-
-.about-section p {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: #ccc;
-  margin-bottom: 1.5rem;
-}
-
-.about-section ul,
-.settings-section ul {
-  list-style: none;
-  padding: 0;
-  margin: 1rem 0;
-}
-
-.about-section li,
-.settings-section li {
-  font-size: 1.1rem;
-  color: #ccc;
-  padding: 0.5rem 0;
-  margin-bottom: 0.5rem;
-}
-
-.settings-group {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
 }
 
 /* Loading states */
