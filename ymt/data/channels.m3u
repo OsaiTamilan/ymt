@@ -14,6 +14,18 @@ https://5k8q87azdy4v-hls-live.wmncdn.net/MAKKAL/271ddf829afeece44d8732757fba1a66
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/en/b/bf/Vasanth_TV_logo.png" group-title="Live" c-no="144" Language="Tamil" Category="Entert.",Vasanth TV
 https://vasanth.pc.cdn.bitgravity.com/vasanth/secure/live/feed01/playlist.m3u8
 
+#EXTINF:-1 tvg-logo="https://i.imgur.com/3l25EZI.png" group-title="Live" c-no="1111" Language="Tamil" Category="Entert.",Moon TV
+https://player.mslivestream.net/mslive/e10bb900976df9177b9a080314f26f86.sdp/index.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.ibb.co/NynvtQm/1-210414213-U60-L.jpg" group-title="Live" c-no="1112" Language="Tamil" Category="Music",MNTV Music
+https://mntv.livebox.co.in/musichls/live.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.imgur.com/cFNw4Af.png" group-title="Live" c-no="1113" Language="Tamil" Category="Entert.",MN TV
+https://mntv.livebox.co.in/mntvhls/live.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.imgur.com/etr1k08.png" group-title="Live" c-no="1114" Language="Tamil" Category="Entert.",Vaanavil TV
+https://6n3yope4d9ok-hls-live.5centscdn.com/vaanavil/TV.stream/playlist.m3u8
+
 #EXTINF:-1 tvg-logo="https://threetamil.tv/wp-content/uploads/2020/08/3Tamil_logo_white.png" group-title="Live" c-no="3" Language="Tamil" Category="Entert.",3Tamil
 https://6n3yogbnd9ok-hls-live.5centscdn.com/threetamil/d0dbe915091d400bd8ee7f27f0791303.sdp/index.m3u8
 
@@ -67,3 +79,9 @@ https://vods1.aynaott.com/kidscreation_test/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="https://images.squarespace-cdn.com/content/v1/5c4104e7af209609ea6f281b/b440d39b-935e-4b40-9b6d-edc3d94f11b9/Primary+Logo.png" group-title="Live" c-no="424" Language="English" Category="Kids",Zoo Moo
 https://amg01553-blueantmediaasi-zoomoonz-samsungnz-rdufn.amagi.tv/playlist/amg01553-blueantmediaasi-zoomoonz-samsungnz/playlist.m3u8
+
+#EXTINF:-1 tvg-logo="https://www.findin.am/wp-content/uploads/2023/01/SONG-TV-Armenia-3-1.png" group-title="Live" c-no="1221" Language="Hindi" Category="Music",song tv
+https://songtv.hls.iptvdc.com/web-armenia/index.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.imgur.com/YEKEaB4.png" group-title="Live" c-no="1222" Language="Telugu" Category="Entert.",Verbum TV
+https://verbumtv.livebox.co.in/verbumtvhls/live.m3u8
