@@ -221,3 +221,39 @@ iframe[src*="youtube.com"] {
   background: rgba(0, 255, 0, 0.15);
   border: 1px solid rgba(0, 255, 0, 0.5);
 }
+
+/* Error message styles */
+.error-container {
+  text-align: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  max-width: 80%;
+}
+
+.error-title {
+  font-size: 1.5rem;
+  color: #f87171;
+  margin-bottom: 10px;
+}
+
+.error-message {
+  font-size: 1rem;
+  color: #f3f4f6;
+  margin-bottom: 20px;
+}
+
+.retry-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+  background-color: #2563eb;
+}

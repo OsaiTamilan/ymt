@@ -28,7 +28,7 @@ function resetNavHideTimer() {
   }
   navHideTimeout = setTimeout(() => {
     hideNavBar();
-  }, 3000); // 3 seconds
+  }, 4000); // 3 seconds
 }
 
 function handleNavigation(event) {
@@ -75,19 +75,19 @@ function handleNavigation(event) {
       const action = navItems[navIndex].querySelector('span:last-child').textContent.toLowerCase();
       switch(action) {
         case 'home':
-          window.location.href = '../../ymt/index.html';
+          window.location.href = '../../index.html';
           break;
         case 'language':
-          window.location.href = '../../ymt/index.html';
+          window.location.href = '../../player.html';
           break;
         case 'category':
-          window.location.href = '../../ymt/index.html';
+          window.location.href = '../../player.html';
           break;
         case 'about':
-          window.location.href = '../../ymt/about.html';
+          window.location.href = '../../about.html';
           break;
         case 'settings':
-          window.location.href = '../../ymt/settings.html';
+          window.location.href = '../../settings.html';
           break;
       }
       break;
