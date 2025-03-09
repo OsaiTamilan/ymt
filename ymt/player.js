@@ -68,10 +68,10 @@ function parseM3U(content) {
 }
 
 function clearAllSelections() {
-  // Remove all selection classes and borders
   document.querySelectorAll('.nav-item, .category-item, .channel-item').forEach(item => {
     item.classList.remove('selected');
-    item.style.border = 'none';
+    // Remove any inline border styles
+    item.style.removeProperty('border');
   });
 }
 
@@ -80,24 +80,29 @@ function updateSelectionStates() {
   clearAllSelections();
 
   // Only apply selection to the active column
+  let selectedItem = null;
+
   if (activeColumn === 0) {
     const navItems = document.querySelectorAll('.nav-item');
     if (currentNavIndex >= 0 && currentNavIndex < navItems.length) {
-      const selectedItem = navItems[currentNavIndex];
-      selectedItem.classList.add('selected');
+      selectedItem = navItems[currentNavIndex];
     }
   } else if (activeColumn === 1) {
     const categoryItems = document.querySelectorAll('.category-item');
     if (currentCategoryIndex >= 0 && currentCategoryIndex < categoryItems.length) {
-      const selectedItem = categoryItems[currentCategoryIndex];
-      selectedItem.classList.add('selected');
+      selectedItem = categoryItems[currentCategoryIndex];
     }
   } else if (activeColumn === 2) {
     const channelItems = document.querySelectorAll('.channel-item');
     if (currentChannelIndex >= 0 && currentChannelIndex < channelItems.length) {
-      const selectedItem = channelItems[currentChannelIndex];
-      selectedItem.classList.add('selected');
+      selectedItem = channelItems[currentChannelIndex];
     }
+  }
+
+  if (selectedItem) {
+    selectedItem.classList.add('selected');
+    // Ensure the selected item is visible
+    selectedItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }
 
