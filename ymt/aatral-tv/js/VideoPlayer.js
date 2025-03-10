@@ -166,12 +166,12 @@ export class VideoPlayer {
     
     // If current date's playlist is not available or empty, try the backup file
     console.log('Current date playlist not found or empty, trying backup file...');
-    playlist = await this.loadPlaylist('data/emergency/backup.m3u8');
+    playlist = await this.loadPlaylist('data/emergency/backup.m3u');
     
     if (playlist && playlist.length > 0) {
       console.log('Successfully loaded backup playlist');
       this.playlist = playlist;
-      this.currentPlaylistSource = 'data/emergency/backup.m3u8';
+      this.currentPlaylistSource = 'data/emergency/backup.m3u';
       return;
     }
     
