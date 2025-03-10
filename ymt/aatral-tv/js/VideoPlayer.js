@@ -1,17 +1,15 @@
 import { parseM3U } from './m3uParser.js';
-
+// no fallback video + no Spinner
 export class VideoPlayer {
   constructor() {
     this.player = null;
     this.playlist = [];
     this.currentIndex = 0;
     this.checkInterval = null;
-    this.loadingSpinner = document.getElementById('loading-spinner');
     this.isPlaying = false;
     this.lastButtonState = false;
     this.retryCount = 0;
     this.maxRetries = 3;
-    this.fallbackVideoId = 'xd5927hV9Ho'; // Fallback video ID as last resort
     this.currentPlaylistSource = null; // Track which playlist source we're using
     this.isAndroidTV = this.detectAndroidTV();
     this.init();
@@ -133,22 +131,7 @@ export class VideoPlayer {
       this.loadYouTubeAPI();
     } catch (error) {
       console.error('Error loading playlist:', error.message);
-      if (this.loadingSpinner) {
-        this.loadingSpinner.innerHTML = `
-          <div class="error-container">
-            <p class="error-title">Could not load playlist</p>
-            <p class="error-message">${error.message}</p>
-            <button class="retry-button" id="retry-button">
-              Retry
-            </button>
-          </div>
-        `;
-        
-        const retryButton = document.getElementById('retry-button');
-        if (retryButton) {
-          retryButton.addEventListener('click', () => this.init());
-        }
-      }
+      alert(`Could not load playlist: ${error.message}`);
     }
   }
 
@@ -175,18 +158,8 @@ export class VideoPlayer {
       return;
     }
     
-    // If both failed, create a fallback playlist with just the fallback video
-    console.log('All playlist sources failed, using fallback video');
-    this.playlist = [{
-      title: 'Fallback Video',
-      url: `https://www.youtube.com/watch?v=${this.fallbackVideoId}`,
-      startTime: 0,
-      endTime: 3600, // 1 hour
-      totalTime: 30,
-      streamingTime: '00:00:00',
-      videoId: this.fallbackVideoId
-    }];
-    this.currentPlaylistSource = 'fallback';
+    // If both failed, show an error
+    alert('Failed to load any playlist. Please check your internet connection or the playlist files.');
   }
   
   setupGamepadControls() {
@@ -323,9 +296,6 @@ export class VideoPlayer {
     
     // Automatically create the player without showing the start button
     this.createPlayer(true);
-    if (this.loadingSpinner) {
-      this.loadingSpinner.style.display = 'none';
-    }
     
     // Show navigation bar
     const mainNav = document.querySelector('.main-nav');
@@ -391,10 +361,6 @@ export class VideoPlayer {
   }
   
   onPlayerReady() {
-    if (this.loadingSpinner) {
-      this.loadingSpinner.style.display = 'none';
-    }
-    
     // For Android TV, we need to explicitly call playVideo
     if (this.isAndroidTV) {
       // Add a slight delay for Android TV
@@ -452,12 +418,6 @@ export class VideoPlayer {
     if (event.data === YT.PlayerState.PLAYING) {
       this.isPlaying = true;
       this.startTimeCheck();
-      
-      // Hide loading spinner when video starts playing
-      if (this.loadingSpinner) {
-        this.loadingSpinner.style.display = 'none';
-      }
-      
       console.log('Video is now playing');
     } else if (event.data === YT.PlayerState.PAUSED) {
       this.isPlaying = false;
@@ -466,19 +426,8 @@ export class VideoPlayer {
       this.handleVideoEnd();
       console.log('Video ended');
     } else if (event.data === YT.PlayerState.BUFFERING) {
-      // Show loading spinner during buffering
-      if (this.loadingSpinner) {
-        this.loadingSpinner.innerHTML = `<div class="spinner"></div>`;
-        this.loadingSpinner.style.display = 'block';
-      }
       console.log('Video is buffering');
     } else if (event.data === YT.PlayerState.CUED) {
-      // Hide loading spinner when video is cued
-      if (this.loadingSpinner) {
-        this.loadingSpinner.style.display = 'none';
-      }
-      console.log('Video is cued');
-      
       // If video is cued but not playing, try to focus and click the play button
       setTimeout(() => {
         if (!this.isPlaying) {
@@ -513,156 +462,24 @@ export class VideoPlayer {
     }
     
     console.log(`Error details: ${errorMessage} (code: ${event.data})`);
-    
-    // If we're already using the fallback video and it fails, show error
-    if (this.currentPlaylistSource === 'fallback' && this.playlist[this.currentIndex].videoId === this.fallbackVideoId) {
-      if (this.loadingSpinner) {
-        this.loadingSpinner.innerHTML = `
-          <div class="error-container">
-            <p class="error-title">Playback Error</p>
-            <p class="error-message">Even the fallback video failed to play. Please check your internet connection.</p>
-            <button class="retry-button" id="retry-button">
-              Retry
-            </button>
-          </div>
-        `;
-        this.loadingSpinner.style.display = 'block';
-        
-        const retryButton = document.getElementById('retry-button');
-        if (retryButton) {
-          retryButton.addEventListener('click', () => {
-            this.retryCount = 0;
-            this.init();
-          });
-        }
-      }
-      return;
-    }
-    
-    // Try next video in current playlist
+
+    // Retry loading the next video in the playlist
     if (this.retryCount < this.maxRetries) {
       this.retryCount++;
       console.log(`Retrying playback (${this.retryCount}/${this.maxRetries})...`);
-      
-      if (this.loadingSpinner) {
-        this.loadingSpinner.innerHTML = `
-          <div class="spinner"></div>
-          <div class="text-white text-center">
-            <p class="text-xl mb-2">Retrying playback...</p>
-            <p class="text-gray-400">${this.retryCount}/${this.maxRetries}</p>
-          </div>
-        `;
-        this.loadingSpinner.style.display = 'block';
-      }
       
       // Try to load the next video in the playlist
       if (this.currentIndex < this.playlist.length - 1) {
         this.currentIndex++;
         setTimeout(() => this.loadNextVideo(), 2000);
-      } else if (this.currentPlaylistSource !== 'fallback') {
-        // If we've exhausted the current playlist, try the fallback
-        setTimeout(() => this.tryFallbackVideo(), 2000);
+      } else {
+        alert(`Error: ${errorMessage}. All playback attempts failed. Please try again later.`);
       }
     } else {
       // If we've tried multiple videos in the current playlist and they all failed,
-      // try switching to the backup playlist or fallback video
-      if (this.currentPlaylistSource === `data/${VideoPlayer.getCurrentIndianDate()}.m3u`) {
-        // If we're using the current date playlist, try the backup
-        this.loadBackupPlaylist();
-      } else if (this.currentPlaylistSource === 'data/emergency/backup.m3u8') {
-        // If we're using the backup playlist, try the fallback video
-        this.tryFallbackVideo();
-      } else {
-        // We've tried everything, show error
-        if (this.loadingSpinner) {
-          this.loadingSpinner.innerHTML = `
-            <div class="error-container">
-              <p class="error-title">${errorMessage}</p>
-              <p class="error-message">All playback attempts failed. Please try again later.</p>
-              <button class="retry-button" id="retry-button">
-                Retry
-              </button>
-            </div>
-          `;
-          this.loadingSpinner.style.display = 'block';
-          
-          const retryButton = document.getElementById('retry-button');
-          if (retryButton) {
-            retryButton.addEventListener('click', () => {
-              this.retryCount = 0;
-              this.init();
-            });
-          }
-        }
-      }
+      // try switching to the backup playlist
+      alert(`Error: ${errorMessage}. All playback attempts failed.`);
     }
-  }
-  
-  async loadBackupPlaylist() {
-    console.log('Switching to backup playlist...');
-    if (this.loadingSpinner) {
-      this.loadingSpinner.innerHTML = `
-        <div class="spinner"></div>
-        <div class="text-white text-center">
-          <p class="text-xl mb-2">Switching to backup playlist...</p>
-        </div>
-      `;
-      this.loadingSpinner.style.display = 'block';
-    }
-    
-    const playlist = await this.loadPlaylist('data/emergency/backup.m3u8');
-    if (playlist && playlist.length > 0) {
-      this.playlist = playlist;
-      this.currentPlaylistSource = 'data/emergency/backup.m3u8';
-      this.currentIndex = 0;
-      this.retryCount = 0;
-      
-      // Recreate the player with the new playlist
-      if (this.player) {
-        this.player.destroy();
-        this.player = null;
-      }
-      
-      setTimeout(() => this.createPlayer(true), 1000);
-    } else {
-      // Backup playlist failed, try fallback video
-      this.tryFallbackVideo();
-    }
-  }
-  
-  tryFallbackVideo() {
-    console.log('Switching to fallback video...');
-    if (this.loadingSpinner) {
-      this.loadingSpinner.innerHTML = `
-        <div class="spinner"></div>
-        <div class="text-white text-center">
-          <p class="text-xl mb-2">Switching to fallback video...</p>
-        </div>
-      `;
-      this.loadingSpinner.style.display = 'block';
-    }
-    
-    // Create a fallback playlist with just the fallback video
-    this.playlist = [{
-      title: 'Fallback Video',
-      url: `https://www.youtube.com/watch?v=${this.fallbackVideoId}`,
-      startTime: 0,
-      endTime: 3600, // 1 hour
-      totalTime: 30,
-      streamingTime: '00:00:00',
-      videoId: this.fallbackVideoId
-    }];
-    this.currentPlaylistSource = 'fallback';
-    this.currentIndex = 0;
-    this.retryCount = 0;
-    
-    // Recreate the player with the fallback video
-    if (this.player) {
-      this.player.destroy();
-      this.player = null;
-    }
-    
-    setTimeout(() => this.createPlayer(true), 1000);
   }
   
   loadNextVideo() {
