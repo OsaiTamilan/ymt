@@ -1,5 +1,5 @@
-import './style.css';
-import videoData from './data.json';
+import 'style.css';
+import videoData from 'data.json';
 
 // Initialize Lucide icons
 lucide.createIcons();
