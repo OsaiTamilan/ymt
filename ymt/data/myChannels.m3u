@@ -1,8 +1,8 @@
 #EXTM3U
-#EXTINF:-1 tvg-logo="data/aatral.png" group-title="Live" c-no="" Language="Tamil" Category="Entrt.",Aatral TV
+#EXTINF:-1 tvg-logo="data/aatral.png" group-title="Live" c-no="51" Language="Tamil" Category="Entrt.",Aatral TV
 aatral-tv/aatral-tv.html
 
-#EXTINF:-1 tvg-logo="data/joyley.png" group-title="Live" c-no="" Language="Tamil" Category="News",JoyLey TV
+#EXTINF:-1 tvg-logo="data/joyley.png" group-title="Live" c-no="52" Language="Tamil" Category="News",JoyLey TV
 aatral-tv/aatral-tv.html
 
 
