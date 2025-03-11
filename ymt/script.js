@@ -112,29 +112,9 @@ function updateChannelGrid() {
 
   channelList.innerHTML = '';
   
-  // Add Aatral TV card first
-  const aatralCard = document.createElement('div');
-  aatralCard.className = 'channel-card';
-  aatralCard.setAttribute('tabindex', '0');
-  aatralCard.innerHTML = `
-    <a href="aatral-tv/aatral-tv.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
-      <div class="channel-logo-container">
-        <img src="aatral-tv/data/aatral.png" alt="Aatral TV" class="channel-logo">
-      </div>
-      <div class="channel-info">
-        <h3>Aatral TV</h3>
-        <div class="channel-meta">
-          <span class="channel-category">Entrt.</span>
-          <span class="channel-language">Tamil</span>
-        </div>
-      </div>
-    </a>
-  `;
-  channelList.appendChild(aatralCard);
-  
-  // Add the rest of the channels
+  // Add filtered channels
   filteredChannels.forEach((channel, index) => {
-    channelList.appendChild(createChannelCard(channel, index + 1)); // +1 because Aatral TV is index 0
+    channelList.appendChild(createChannelCard(channel, index));
   });
   
   updateSelectedCard();
@@ -144,7 +124,7 @@ function createChannelCard(channel, tabIndex) {
   const card = document.createElement('div');
   card.className = 'channel-card';
   card.dataset.channelNo = channel.channelNo;
-  card.dataset.index = tabIndex - 1; // Store the index in the filteredChannels array
+  card.dataset.index = tabIndex;
   card.setAttribute('tabindex', tabIndex.toString());
   
   const content = `

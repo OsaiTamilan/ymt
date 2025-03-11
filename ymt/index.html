@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script type="module" src="script.js"></script>
+    <script type="module" src="js/myChannels.js"></script>
   </head>
   <body>
     <main class="home-page">
@@ -49,7 +50,7 @@
             <span class="material-icons">settings</span>
             <span>Settings</span>
           </div>
-          <div class="nav-item" tabindex="0" role="button" aria-label="Aatral TV">
+         <div class="nav-item" tabindex="0" role="button" aria-label="Aatral TV">
             <a href="aatral-tv/aatral-tv.html" style="display: flex; align-items: center; padding: 25px 20px; background: rgba(0, 255, 0, 0.15); border: 1px solid rgba(0, 255, 0, 0.5); border-radius: 4px; color: white; text-decoration: none;">
               <span class="material-icons" style="margin-right: 5px;">tv</span>
               Watch Aatral TV
@@ -57,42 +58,70 @@
           </div>
         </nav>
       </div>
-      <div class="channels-container">
+
+      <!-- Video player overlay container -->
+      <div class="overlay-container">
+        <div id="videoPlayerOverlay" class="video-player-overlay">
+          <div id="menu" class="video-menu">
+            <div class="menu-item" data-action="home">
+              <span class="material-icons">home</span>
+              <span>Home</span>
+            </div>
+            <div class="menu-item" data-action="language">
+              <span class="material-icons">language</span>
+              <span>Language</span>
+            </div>
+            <div class="menu-item" data-action="category">
+              <span class="material-icons">category</span>
+              <span>Category</span>
+            </div>
+            <div class="menu-item" data-action="about">
+              <span class="material-icons">info</span>
+              <span>About</span>
+            </div>
+            <div class="menu-item" data-action="settings">
+              <span class="material-icons">settings</span>
+              <span>Settings</span>
+            </div>
+          </div>
+          <video id="videoPlayer" controls playsinline></video>
+        </div>
+      </div>
+
+      <!-- Welcome container -->
+      <div class="channels-container welcome-section">
+        <h3>Welcome All TV</h3>
         <div id="channelList" class="channel-grid">
           <div class="loading">Loading channels...</div>
         </div>
       </div>
+
+      <!-- My Channels container -->
+      <div class="channels-container my-channels">
+        <h2>My Channels</h2>
+        <div id="myChannelList" class="channel-grid">
+          <div class="loading">Loading channels...</div>
+        </div>
+      </div>
+
+      <!-- My Ad container -->
+      <div class="channels-container my-ad">
+          <h5 style="color: gray; text-align: center;">Advertisement</h5>
+          <div style="text-align: center;">
+              <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3814157539218486"
+                      crossorigin="anonymous"></script>
+              <!-- Aatral TV TV -->
+              <ins class="adsbygoogle"
+                   style="display:inline-block;width:728px;height:90px"
+                   data-ad-client="ca-pub-3814157539218486"
+                   data-ad-slot="2895961035"></ins>
+              <script>
+                  (adsbygoogle = window.adsbygoogle || []).push({});
+              </script>
+          </div>
+      </div>
+
       <div id="numberDisplay"></div>
     </main>
-       
-    <!-- Video player overlay -->
-    <div class="overlay-container">
-      <div id="videoPlayerOverlay" class="video-player-overlay">
-        <!-- Navigation menu -->
-        <div id="menu" class="video-menu">
-          <div class="menu-item" data-action="home">
-            <span class="material-icons">home</span>
-            <span>Home</span>
-          </div>
-          <div class="menu-item" data-action="language">
-            <span class="material-icons">language</span>
-            <span>Language</span>
-          </div>
-          <div class="menu-item" data-action="category">
-            <span class="material-icons">category</span>
-            <span>Category</span>
-          </div>
-          <div class="menu-item" data-action="about">
-            <span class="material-icons">info</span>
-            <span>About</span>
-          </div>
-          <div class="menu-item" data-action="settings">
-            <span class="material-icons">settings</span>
-            <span>Settings</span>
-          </div>
-        </div>
-        <video id="videoPlayer" controls playsinline></video>
-      </div>
-    </div>
   </body>
 </html>

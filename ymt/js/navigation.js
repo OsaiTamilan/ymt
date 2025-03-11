@@ -4,20 +4,25 @@ let isInDropdown = false;
 let navIndex = 0;
 let languageIndex = 0;
 let selectedIndex = 0;
+let isInMyChannels = false;
 const COLUMNS = 6;
 
 // Update UI based on navigation state
 function updateSelectedCard() {
+  // First clear all selections
   document.querySelectorAll('.channel-card').forEach(card => {
     card.classList.remove('selected');
   });
   
   if (!isInNav && !isInDropdown) {
-    const cards = document.querySelectorAll('.channel-card');
+    // Get the correct container based on which section we're in
+    const container = isInMyChannels ? document.getElementById('myChannelList') : document.getElementById('channelList');
+    if (!container) return;
+
+    const cards = container.querySelectorAll('.channel-card');
     if (cards[selectedIndex]) {
       cards[selectedIndex].classList.add('selected');
       
-      // Ensure smooth scrolling and proper focus for TV
       try {
         cards[selectedIndex].focus();
         cards[selectedIndex].scrollIntoView({ 
@@ -95,13 +100,13 @@ function handleNavigation(event, channels, filteredChannels, handleNumberInput, 
     const totalLanguages = languageItems.length;
 
     switch(key) {
-      case 'ArrowUp':
+      case 'ArrowLeft':
         if (languageIndex > 0) {
           languageIndex--;
           updateSelectedLanguage();
         }
         break;
-      case 'ArrowDown':
+      case 'ArrowRight':
         if (languageIndex < totalLanguages - 1) {
           languageIndex++;
           updateSelectedLanguage();
@@ -141,6 +146,7 @@ function handleNavigation(event, channels, filteredChannels, handleNumberInput, 
       case 'ArrowDown':
         isInNav = false;
         selectedIndex = 0;
+        isInMyChannels = false;
         updateSelectedNavItem();
         updateSelectedCard();
         break;
@@ -174,15 +180,27 @@ function handleNavigation(event, channels, filteredChannels, handleNumberInput, 
         break;
     }
   } else {
-    const totalChannels = filteredChannels.length;
+    // Get the current container and its cards
+    const currentContainer = isInMyChannels ? document.getElementById('myChannelList') : document.getElementById('channelList');
+    if (!currentContainer) return;
+
+    const cards = currentContainer.querySelectorAll('.channel-card');
+    const totalCards = cards.length;
     const currentRow = Math.floor(selectedIndex / COLUMNS);
     const currentCol = selectedIndex % COLUMNS;
-    const totalRows = Math.ceil(totalChannels / COLUMNS);
+    const totalRows = Math.ceil(totalCards / COLUMNS);
 
     switch(key) {
       case 'ArrowUp':
         if (currentRow === 0) {
-          isInNav = true;
+          if (isInMyChannels) {
+            // Move to main channels section
+            isInMyChannels = false;
+            selectedIndex = Math.min(selectedIndex, filteredChannels.length - 1);
+          } else {
+            // Move to nav
+            isInNav = true;
+          }
           updateSelectedNavItem();
           updateSelectedCard();
         } else {
@@ -195,8 +213,13 @@ function handleNavigation(event, channels, filteredChannels, handleNumberInput, 
         break;
       case 'ArrowDown':
         const newIndex = selectedIndex + COLUMNS;
-        if (newIndex < totalChannels) {
+        if (newIndex < totalCards) {
           selectedIndex = newIndex;
+          updateSelectedCard();
+        } else if (!isInMyChannels && document.getElementById('myChannelList').querySelectorAll('.channel-card').length > 0) {
+          // Move to My Channels if we're at the bottom of main channels
+          isInMyChannels = true;
+          selectedIndex = 0;
           updateSelectedCard();
         }
         break;
@@ -207,15 +230,20 @@ function handleNavigation(event, channels, filteredChannels, handleNumberInput, 
         }
         break;
       case 'ArrowRight':
-        if (currentCol < COLUMNS - 1 && selectedIndex < totalChannels - 1) {
+        if (currentCol < COLUMNS - 1 && selectedIndex < totalCards - 1) {
           selectedIndex++;
           updateSelectedCard();
         }
         break;
       case 'Enter':
-        const selectedChannel = filteredChannels[selectedIndex];
-        if (selectedChannel) {
-          navigateToChannel(selectedIndex);
+        const selectedCard = cards[selectedIndex];
+        if (selectedCard) {
+          const link = selectedCard.querySelector('a');
+          if (link) {
+            window.location.href = link.href;
+          } else {
+            navigateToChannel(selectedIndex);
+          }
         }
         break;
       case 'Escape':

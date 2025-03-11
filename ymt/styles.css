@@ -24,7 +24,7 @@ main {
 
 /* Header container */
 .header-container {
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
@@ -207,11 +207,11 @@ main {
 
 .channels-container {
   padding: 1rem;
-  min-height: 75vh;
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  margin-top: 230px; /* Adjusted spacing from nav bar */
+ /* min-height: 75vh;
+  margin-top: 230px;  Adjusted spacing from nav bar */
 }
 
 .channel-grid {
@@ -365,7 +365,7 @@ main {
   position: absolute;
   top: 0;
   left: 0;
-  width: 5%;
+  width: 15%;
   height: 100%;
   background: rgba(0, 0, 0, 0.8);
   display: none;

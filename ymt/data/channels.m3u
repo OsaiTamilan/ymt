@@ -17,9 +17,6 @@ https://vasanth.pc.cdn.bitgravity.com/vasanth/secure/live/feed01/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/3l25EZI.png" group-title="Live" c-no="1111" Language="Tamil" Category="Entert.",Moon TV
 https://player.mslivestream.net/mslive/e10bb900976df9177b9a080314f26f86.sdp/index.m3u8
 
-#EXTINF:-1 tvg-logo="https://i.ibb.co/NynvtQm/1-210414213-U60-L.jpg" group-title="Live" c-no="1112" Language="Tamil" Category="Music",MNTV Music
-https://mntv.livebox.co.in/musichls/live.m3u8
-
 #EXTINF:-1 tvg-logo="https://i.imgur.com/cFNw4Af.png" group-title="Live" c-no="1113" Language="Tamil" Category="Entert.",MN TV
 https://mntv.livebox.co.in/mntvhls/live.m3u8
 
@@ -85,3 +82,6 @@ https://songtv.hls.iptvdc.com/web-armenia/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.imgur.com/YEKEaB4.png" group-title="Live" c-no="1222" Language="Telugu" Category="Entert.",Verbum TV
 https://verbumtv.livebox.co.in/verbumtvhls/live.m3u8
+
+#EXTINF:-1 tvg-logo="https://www.brucesallan.com/wp-content/uploads/2013/06/MTV-logo.jpg" group-title="Live" c-no="1112" Language="Tamil" Category="Music",MNTV Music
+https://mntv.livebox.co.in/musichls/live.m3u8
